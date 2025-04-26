@@ -1,46 +1,46 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { supabase } from '../supabaseClient';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { supabase } from '../lib/supabase';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { AlertCircle, CheckCircle, Lock } from 'lucide-react';
 
-export default function ResetPassword() {
+export const ResetPassword = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
-  const [message, setMessage] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const [type, setType] = useState<'verify' | 'update'>('verify');
 
   useEffect(() => {
-    const accessToken = searchParams.get('access_token');
-    if (!accessToken) {
-      setMessage('Invalid or expired reset link.');
-    }
-  }, [searchParams]);
-
-  async function handleReset(e: React.FormEvent) {
-    e.preventDefault();
-    setMessage('');
-    if (password.length < 8) {
-      setMessage('Password must be at least 8 characters.');
+    const code = searchParams.get('code');
+    if (!code) {
+      navigate('/auth', { replace: true });
       return;
     }
-    if (password !== confirm) {
-      setMessage('Passwords do not match.');
-      return;
-    }
-    setSubmitting(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    setSubmitting(false);
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setMessage('Password reset successful! Redirecting to login...');
-      setTimeout(() => navigate('/login'), 2000);
-    }
-  }
+    
+    // Verify the code first
+    const verifyCode = async () => {
+      try {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: code,
+          type: 'recovery'
+        });
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+        if (error) {
+          throw error;
+        }
+
+        setType('update');
+      } catch (error) {
+        console.error('Code verification error:', error);
+        navigate('/auth', { replace: true });
+      }
+    };
+
     verifyCode();
   }, [searchParams, navigate]);
 
