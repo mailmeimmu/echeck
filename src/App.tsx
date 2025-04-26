@@ -5,7 +5,7 @@ import { AdminDashboard } from './components/admin/AdminDashboard';
 import { BookingsPage } from './pages/admin/BookingsPage';
 import { EngineersPage } from './pages/admin/EngineersPage';
 import { ReportsPage } from './pages/admin/ReportsPage';
-import { EngineerDashboard } from './pages/EngineerDashboard';
+import { EngineerDashboard } from './pages/EngineerDashboard'; // This should be your requests page
 import { EngineerProfile } from './pages/EngineerProfile';
 import { AnimatePresence } from 'framer-motion';
 import { LoadingScreen } from './components/ui/LoadingScreen';
@@ -34,38 +34,43 @@ export default function App() {
   return (
     <BrowserRouter>
       <AnimatePresence mode="wait">
-        {!user ? (
-          <Routes>
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/auth/reset-password" element={<ResetPassword />} />
-            <Route path="/" element={<LandingPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        ) : isAdmin ? (
-          <AdminLayout>
-            <Routes>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/auth/reset-password" element={<ResetPassword />} />
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Admin routes */}
+          {user && isAdmin && (
+            <Route element={<AdminLayout />}>
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/bookings" element={<BookingsPage />} />
               <Route path="/admin/engineers" element={<EngineersPage />} />
               <Route path="/admin/reports" element={<ReportsPage />} />
               <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
-              <Route path="*" element={<Navigate to="/admin" replace />} />
-            </Routes>
-          </AdminLayout>
-        ) : isEngineer ? (
-          <EngineerLayout>
-            <Routes>
+            </Route>
+          )}
+
+          {/* Engineer routes */}
+          {user && isEngineer && (
+            <Route element={<EngineerLayout />}>
+              <Route index path="/engineer" element={<EngineerDashboard />} /> {/* Requests page */}
               <Route path="/engineer/profile" element={<EngineerProfile />} />
-              <Route path="*" element={<Navigate to="/engineer/profile" replace />} />
-            </Routes>
-          </EngineerLayout>
-        ) : (
-          <Routes>
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/auth/reset-password" element={<ResetPassword />} />
-            <Route path="*" element={<Navigate to="/auth" replace />} />
-          </Routes>
-        )}
+              <Route path="/engineer/*" element={<Navigate to="/engineer" replace />} />
+            </Route>
+          )}
+
+          {/* Fallback */}
+          <Route path="*" element={
+            user
+              ? isAdmin
+                ? <Navigate to="/admin" replace />
+                : isEngineer
+                  ? <Navigate to="/engineer" replace />
+                  : <Navigate to="/auth" replace />
+              : <Navigate to="/" replace />
+          } />
+        </Routes>
       </AnimatePresence>
     </BrowserRouter>
   );
