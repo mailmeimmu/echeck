@@ -18,6 +18,7 @@ export const AuthForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     const form = e.target as HTMLFormElement;
@@ -25,15 +26,14 @@ export const AuthForm = () => {
 
     try {
       if (isResetMode) {
+        // Send reset password email
         await resetPassword(email);
         setSuccess('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني');
-        setIsResetMode(false);
+        // Optionally, keep in reset mode or return to login
+        // setIsResetMode(false);
       } else {
         const password = (form.password as HTMLInputElement).value;
-        console.log('Attempting login with:', { email });
-
         const { isEngineer, isAdmin } = await signIn(email, password);
-        console.log('Login response:', { isEngineer, isAdmin });
 
         if (isEngineer) {
           navigate('/engineer', { replace: true });
@@ -42,7 +42,6 @@ export const AuthForm = () => {
         }
       }
     } catch (err) {
-      console.error('Auth error:', err);
       if (err instanceof Error) {
         setError(err.message);
       } else {

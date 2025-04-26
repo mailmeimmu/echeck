@@ -10,6 +10,7 @@ import { LandingPage } from './pages/Landing';
 import { ResetPassword } from './pages/ResetPassword';
 import { Suspense } from 'react';
 import React from 'react';
+import ForgotPassword from './pages/ForgotPassword';
 
 // Lazy load route components
 const AdminDashboard = React.lazy(() => import('./components/admin/AdminDashboard'));
@@ -43,6 +44,7 @@ export default function App() {
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/auth/reset-password" element={<ResetPassword />} />
+            <Route path="/auth/forgot-password" element={<ForgotPassword />} />
             <Route path="/" element={<LandingPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
@@ -73,6 +75,7 @@ export default function App() {
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/auth/reset-password" element={<ResetPassword />} />
+            <Route path="/auth/forgot-password" element={<ForgotPassword />} />
             <Route path="*" element={<Navigate to="/auth" replace />} />
           </Routes>
         )}
