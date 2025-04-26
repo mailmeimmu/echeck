@@ -23,11 +23,19 @@ export function ResetPassword() {
   const { access_token, refresh_token, type } = parseHash(window.location.hash);
 
   useEffect(() => {
+    console.log('ResetPassword mounted');
+    console.log('Parsed hash:', { access_token, refresh_token, type });
     // Set session if recovery
     if (type === 'recovery' && access_token && refresh_token) {
       supabase.auth.setSession({
         access_token,
         refresh_token,
+      }).then(({ error }) => {
+        if (error) {
+          console.log('setSession error:', error);
+        } else {
+          console.log('Session set successfully');
+        }
       });
     }
   }, [access_token, refresh_token, type]);
@@ -38,6 +46,7 @@ export function ResetPassword() {
 
     if (!access_token || !refresh_token || type !== 'recovery') {
       setError('رابط إعادة تعيين كلمة المرور غير صالح.');
+      console.log('Invalid reset link or missing token');
       return;
     }
     if (password.length < 6) {
@@ -50,13 +59,16 @@ export function ResetPassword() {
     }
 
     setLoading(true);
+    console.log('Attempting to update password...');
     const { error } = await supabase.auth.updateUser({ password });
     setLoading(false);
 
     if (error) {
       setError(error.message);
+      console.log('Password update error:', error);
     } else {
       setSuccess(true);
+      console.log('Password updated successfully');
       setTimeout(() => navigate('/auth'), 2000);
     }
   };
