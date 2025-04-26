@@ -48,29 +48,56 @@ export const BookingsList = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
+      
+      // Get the current user's engineer ID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      console.log('Fetching bookings for user:', user.id);
+
+      const { data: engineerData } = await supabase
+        .from('engineers')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!engineerData) {
+        console.error('Engineer data not found for user:', user.id);
+        throw new Error('Engineer not found');
+      }
+
+      console.log('Engineer data:', engineerData);
+
       const { data, error: fetchError } = await supabase
         .from('bookings')
         .select(`
-          *,
-          package:packages(
-            name,
-            price
-          ),
-          property_type:property_types(
-            name
+          id,
+          status,
+          location,
+          booking_date,
+          booking_time,
+          notes,
+          engineer_id,
+          package:packages(name, price),
+          property_type:property_types(name),
+        `)
+        .or(`
+          status.in.(pending,open),
+          and(
+            engineer_id.eq.${engineerData.id},
+            status.in.(engineer_assigned,in_progress,completed)
           )
         `)
-        .eq('status', 'pending')
-        .is('engineer_id', null)
-        .order('created_at', { ascending: false });
+        .order('booking_date', { ascending: false });
 
-      // Debug: log what is returned from Supabase
-      console.log('Bookings fetch:', data, fetchError);
+      if (fetchError) {
+        console.error('Error fetching bookings:', fetchError);
+        throw fetchError;
+      }
 
-      if (fetchError) throw fetchError;
+      console.log('Fetched bookings:', data);
 
       setBookings(data || []);
-      console.log('Bookings set in state:', data || []);
       // Fetch rejection reasons
       const { data: reasonsData, error: reasonsError } = await supabase
         .from('rejection_reasons')
@@ -79,7 +106,6 @@ export const BookingsList = () => {
 
       if (reasonsError) throw reasonsError;
 
-      setBookings(data || []);
       setRejectionReasons(reasonsData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -223,21 +249,32 @@ export const BookingsList = () => {
                   <div className="p-2 bg-emerald-50 rounded-xl">
                     <Package className="w-6 h-6 text-emerald-600" />
                   </div>
-                  <span className="font-semibold text-lg">
-                    {booking.package.name}
-                  </span>
+                  <div>
+                    <span className="font-semibold text-lg block">
+                      {booking.package.name}
+                    </span>
+                    <span className="text-emerald-600">
+                      {booking.package.price} ريال
+                    </span>
+                  </div>
                 </div>
                 
                 <span className={`px-4 py-1.5 rounded-full text-sm font-medium ${
                   booking.status === 'pending' 
                     ? 'bg-amber-50 text-amber-700'
+                    : booking.status === 'open'
+                    ? 'bg-emerald-50 text-emerald-700'
                     : booking.status === 'engineer_assigned'
                     ? 'bg-blue-50 text-blue-700'
-                    : 'bg-emerald-50 text-emerald-700'
+                    : booking.status === 'in_progress'
+                    ? 'bg-purple-50 text-purple-700'
+                    : 'bg-gray-50 text-gray-700'
                 }`}>
-                  {booking.status === 'pending' ? 'متاح للحجز'
+                  {booking.status === 'pending' ? 'قيد المراجعة'
+                    : booking.status === 'open' ? 'متاح للحجز'
                     : booking.status === 'engineer_assigned' ? 'تم القبول'
-                    : 'جاري الفحص'}
+                    : booking.status === 'in_progress' ? 'جاري الفحص'
+                    : 'مكتمل'}
                 </span>
               </div>
               
@@ -275,7 +312,7 @@ export const BookingsList = () => {
               )}
 
               <div className="flex gap-2">
-                {booking.status === 'pending' && (
+                {(booking.status === 'pending' || booking.status === 'open') && (
                   <>
                     <Button
                       onClick={() => handleAccept(booking.id)}
