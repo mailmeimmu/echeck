@@ -40,45 +40,40 @@ export default function App() {
   return (
     <BrowserRouter>
       <AnimatePresence mode="wait">
-        {!user ? (
-          <Routes>
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/auth/reset-password" element={<ResetPassword />} />
-            <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-            <Route path="/" element={<LandingPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        ) : isAdmin ? (
-          <AdminLayout>
-            <Suspense fallback={<LoadingScreen />}>
-              <Routes>
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/bookings" element={<BookingsPage />} />
-                <Route path="/admin/engineers" element={<EngineersPage />} />
-                <Route path="/admin/reports" element={<ReportsPage />} />
-                <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
-                <Route path="*" element={<Navigate to="/admin" replace />} />
-              </Routes>
-            </Suspense>
-          </AdminLayout>
-        ) : isEngineer ? (
-          <EngineerLayout>
-            <Suspense fallback={<LoadingScreen />}>
-              <Routes>
-                <Route path="/engineer" element={<EngineerDashboard />} />
-                <Route path="/engineer/profile" element={<EngineerProfile />} />
-                <Route path="*" element={<Navigate to="/engineer" replace />} />
-              </Routes>
-            </Suspense>
-          </EngineerLayout>
-        ) : (
-          <Routes>
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/auth/reset-password" element={<ResetPassword />} />
-            <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-            <Route path="*" element={<Navigate to="/auth" replace />} />
-          </Routes>
-        )}
+        <Routes>
+          {/* Always accessible routes */}
+          <Route path="/auth/reset-password" element={<ResetPassword />} />
+          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+
+          {/* Authenticated/unauthenticated routes */}
+          {!user ? (
+            <>
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </>
+          ) : isAdmin ? (
+            <Route element={<AdminLayout />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/bookings" element={<BookingsPage />} />
+              <Route path="/admin/engineers" element={<EngineersPage />} />
+              <Route path="/admin/reports" element={<ReportsPage />} />
+              <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
+              <Route path="*" element={<Navigate to="/admin" replace />} />
+            </Route>
+          ) : isEngineer ? (
+            <Route element={<EngineerLayout />}>
+              <Route path="/engineer" element={<EngineerDashboard />} />
+              <Route path="/engineer/profile" element={<EngineerProfile />} />
+              <Route path="*" element={<Navigate to="/engineer" replace />} />
+            </Route>
+          ) : (
+            <>
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="*" element={<Navigate to="/auth" replace />} />
+            </>
+          )}
+        </Routes>
       </AnimatePresence>
     </BrowserRouter>
   );
