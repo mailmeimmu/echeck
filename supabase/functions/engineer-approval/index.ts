@@ -1,12 +1,32 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { SMTPClient } from "npm:emailjs@4.0.3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-application-name',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Content-Type': 'application/json'
 };
+
+// Initialize SMTP client
+const smtp = new SMTPClient({
+  user: Deno.env.get('SMTP_USER'),
+  password: Deno.env.get('SMTP_PASSWORD'),
+  host: Deno.env.get('SMTP_HOST'),
+  port: parseInt(Deno.env.get('SMTP_PORT') || '587'),
+  tls: true,
+});
+
+function generateSecurePassword(length = 12) {
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset[randomIndex];
+  }
+  return password;
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -103,21 +123,29 @@ serve(async (req) => {
 
       if (updateError) throw updateError;
 
-      // Send email notification through separate function
-      await supabase.functions.invoke('send-email', {
-        body: {
-          type: 'ENGINEER_APPROVED',
-          data: {
-            email: request.email,
-            password: password
-          }
-        }
+      // Send approval email with credentials
+      await smtp.send({
+        from: Deno.env.get('SMTP_FROM'),
+        to: request.email,
+        subject: 'تم قبول طلب التسجيل كمهندس',
+        text: `مرحباً،
+
+تم قبول طلبك للتسجيل كمهندس في منصة شيك.
+
+معلومات الدخول:
+البريد الإلكتروني: ${request.email}
+كلمة المرور: ${password}
+
+يرجى تغيير كلمة المرور بعد تسجيل الدخول لأول مرة.
+
+مع تحيات،
+فريق شيك`
       });
 
       return new Response(
         JSON.stringify({ 
           success: true,
-          message: 'Engineer approved successfully'
+          message: 'Engineer approved and credentials sent'
         }),
         { headers: corsHeaders }
       );
@@ -142,13 +170,3 @@ serve(async (req) => {
     );
   }
 });
-
-function generateSecurePassword(length = 12) {
-  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-  let password = '';
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * charset.length);
-    password += charset[randomIndex];
-  }
-  return password;
-}

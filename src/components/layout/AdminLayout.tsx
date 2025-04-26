@@ -41,7 +41,6 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
       <motion.nav
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        layout
         className="bg-white shadow-sm py-4 px-6 fixed top-0 left-0 right-0 z-50"
       >
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -62,7 +61,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
       </motion.nav>
 
       {/* Main Content */}
-      <main className="pt-20 min-h-screen bg-gray-50 will-change-transform">
+      <main className="pt-20 min-h-screen bg-gray-50">
         <div className="max-w-6xl mx-auto px-6 py-8">
           {children}
         </div>
@@ -75,7 +74,6 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             <Link
               key={item.path}
               to={item.path}
-              prefetch="intent"
               className={`p-3 rounded-xl transition-colors ${
                 location.pathname === item.path
                   ? 'bg-emerald-50 text-emerald-600'

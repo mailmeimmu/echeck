@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { supabase } from '../../lib/supabase';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { AlertCircle, CheckCircle, Package, Building, Calendar, Clock } from 'lucide-react';
+import { AlertCircle, CheckCircle, Package } from 'lucide-react';
 import { DatePicker } from '../booking/DatePicker';
 import { TimePicker } from '../booking/TimePicker';
+import { supabase } from '../../lib/supabase';
 
 interface PackageType {
   id: string;
@@ -30,6 +30,7 @@ export const BookingForm = () => {
   const [selectedPropertyType, setSelectedPropertyType] = useState<string>('');
   const [bookingDate, setBookingDate] = useState<string>('');
   const [bookingTime, setBookingTime] = useState<string>('');
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,26 +62,53 @@ export const BookingForm = () => {
     fetchData();
   }, []);
 
+  const isValidSaudiPhone = (phone: string) => /^05\d{8}$/.test(phone);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
+      if (!isValidSaudiPhone(phoneNumber)) {
+        setError("رقم الجوال يجب أن يكون بالصيغة السعودية (05xxxxxxxx)");
+        setLoading(false);
+        return;
+      }
+
       const form = e.target as HTMLFormElement;
       const data = {
-        p_external_booking_id: (form.external_booking_id as HTMLInputElement)?.value || '',
-        p_property_type_id: selectedPropertyType,
-        p_booking_date: bookingDate,
-        p_booking_time: bookingTime,
-        p_location: (form.location as HTMLInputElement)?.value || '',
-        p_notes: (form.notes as HTMLTextAreaElement)?.value || '',
-        p_admin_notes: (form.admin_notes as HTMLTextAreaElement)?.value || ''
+        external_booking_id: (form.external_booking_id as HTMLInputElement)?.value || '',
+        property_type_id: selectedPropertyType,
+        booking_date: bookingDate,
+        booking_time: bookingTime,
+        location: (form.location as HTMLInputElement)?.value || '',
+        notes: (form.notes as HTMLTextAreaElement)?.value || '',
+        admin_notes: (form.admin_notes as HTMLTextAreaElement)?.value || '',
+        phone_number: phoneNumber,
+        package_id: selectedPackage
       };
 
-      const { error } = await supabase.rpc('create_admin_booking', data);
+      // Call the Edge Function
+      const response = await fetch(
+        'https://usfejbweconajsyemobr.supabase.co/functions/v1/create_admin_booking',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify(data),
+        }
+      );
 
-      if (error) throw error;
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        setError(result.message || 'حدث خطأ في إنشاء الحجز');
+        setLoading(false);
+        return;
+      }
 
       // Reset form
       setSuccess(true);
@@ -88,8 +116,9 @@ export const BookingForm = () => {
       setSelectedPropertyType('');
       setBookingDate('');
       setBookingTime('');
+      setPhoneNumber('');
       form.reset();
-      
+
       setTimeout(() => {
         setSuccess(false);
       }, 3000);
@@ -192,6 +221,17 @@ export const BookingForm = () => {
           name="location"
           type="text"
           required
+        />
+
+        {/* Phone number input */}
+        <Input
+          label="رقم جوال العميل"
+          name="phone_number"
+          type="text"
+          required
+          value={phoneNumber}
+          onChange={e => setPhoneNumber(e.target.value)}
+          placeholder="05xxxxxxxx"
         />
 
         <div className="grid gap-4 md:grid-cols-2 mb-6">

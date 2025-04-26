@@ -44,7 +44,7 @@ export const EngineerProfile = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 pt-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

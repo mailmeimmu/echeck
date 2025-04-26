@@ -4,15 +4,11 @@ import { supabase } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { AlertCircle, User, ClipboardList } from 'lucide-react';
-import { useMemo } from 'react';
 
 export const EngineerList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [engineers, setEngineers] = useState<any[]>([]);
-
-  // Memoize engineers data
-  const memoizedEngineers = useMemo(() => engineers, [engineers]);
 
   useEffect(() => {
     fetchEngineers();
@@ -30,8 +26,7 @@ export const EngineerList = () => {
             id,
             first_name,
             email
-          ),
-          bookings:bookings(id)
+          )
         `)
         .eq('status', 'active')
         .order('created_at', { ascending: false });
@@ -80,19 +75,17 @@ export const EngineerList = () => {
         </p>
       ) : (
         <div className="grid gap-4">
-          {memoizedEngineers.map((engineer) => (
+          {engineers.map((engineer) => (
             <motion.div
               key={engineer.id}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              layout
-              layoutId={engineer.id}
               className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
             >
               <div className="flex justify-between mb-4">
                 <div>
-                  <h3 className="font-bold">{engineer.profile?.first_name}</h3>
-                  <p className="text-gray-500">{engineer.profile?.email}</p>
+                  <h3 className="font-bold">{engineer.profile.first_name}</h3>
+                  <p className="text-gray-500">{engineer.profile.email}</p>
                 </div>
 
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -111,7 +104,7 @@ export const EngineerList = () => {
                 <div className="flex items-center gap-2 text-gray-600">
                   <ClipboardList className="w-4 h-4" />
                   <span>
-                    {engineer.bookings?.length || 0} حجز
+                  {(engineer.bookings?.length ?? 0)} حجز
                   </span>
                 </div>
               </div>
