@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { CheckCircle, AlertCircle, Building, Shield, Home, Camera, ArrowRight, ArrowLeft, X } from 'lucide-react';
+import { CheckCircle, AlertCircle, Building, Shield, Home, Camera, ArrowRight, ArrowLeft, X, FileText } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PhotoUploader } from './PhotoUploader';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import React from 'react';
 
 interface InspectionFormProps {
   bookingId: string;
@@ -58,40 +59,57 @@ const inspectionSections: InspectionSection[] = [
         requiresPhoto: true
       },
       {
+        id: 'tile_quality',
+        text: 'جودة البلاط ؟',
+        type: 'select',
+        options: [
+          { value: 'hollowness', label: 'تطبيل' },
+          { value: 'levelness', label: 'استواء' },
+          { value: 'slope', label: 'ميول' }
+        ],
+        requiresPhoto: true
+      },
+      {
         id: 'has_hollow_spots',
         text: 'هل يوجد تطبيل في الارضيات؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'levelness_good',
         text: 'هل يعتبر استواء الارضيات جيد؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'slope_good',
         text: 'هل يعتبر ميول الارضيات جيد؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'slip_resistant',
         text: 'هل يعتبر البلاط خشن ومقاوم للانزلاق؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'skirting_good',
         text: 'هل تم تركيب الوزرات بشكل جيد؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'expansion_joints_good',
         text: 'هل تم تركيب فواصل التمدد بشكل جيد؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'rating',
@@ -108,25 +126,29 @@ const inspectionSections: InspectionSection[] = [
         id: 'condition_good',
         text: 'هل الجدران والواجهات بحالة جيدة؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'has_cracks',
         text: 'هل يوجد تشققات بالجدران والواجهات؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'paint_good',
-        text: 'هل الدهان بشكل عام جيد؟',
+        text: 'هل الدهان بشكل عام جيدة؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'has_water_damage',
         text: 'هل يوجد اثر تسربات مياه على الجدران والواجهات؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'rating',
@@ -143,47 +165,54 @@ const inspectionSections: InspectionSection[] = [
         id: 'meter_working',
         text: 'هل تم تركيب عداد الكهرباء الخارجي ويعمل بشكل جيد؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'switches_quality_good',
-        text: 'هل المفاتيح والمقابس الكهربائية ذات جودة جيدة ومطابقة للمواصفات والمقاييس؟',
+        text: 'هل المفاتيح والمقابس الكهربائية ذات جوده جيدة ومطابقه للمواصفات والمقاييس؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'switches_operation_good',
-        text: 'هل سلاسة الفتح والاقفال للمفاتيح الكهربائية تعمل بشكل جيد؟',
+        text: 'هل سلاسة الفتح والاقفال للمفاتيح الكهربائيه تعمل بشكل جيد؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'lighting_distribution_good',
         text: 'هل تم توزيع الإضاءة بشكل جيد؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'switch_locations_good',
         text: 'هل مواقع المفاتيح يعتبر جيد؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'socket_locations_good',
         text: 'هل مواقع الافياش يعتبر جيد؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'bulb_type_good',
         text: 'هل نوع اللمبات يعتبر جيد؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'voltage_type',
-        text: 'ما هو نوع جهد الكهرباء؟',
+        text: 'ماهو نوع جهد الكهرباء؟',
         type: 'select',
         options: [
           { value: '220', label: '220' },
@@ -194,21 +223,24 @@ const inspectionSections: InspectionSection[] = [
       },
       {
         id: 'meter_connections_good',
-        text: 'هل الوصلات والتمديدات للعداد الكهربائي تعتبر جيدة؟',
+        text: 'هل الوصلات والتمديدات للعداد الكهربائي تعتبر جيده؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'outdoor_sockets_protected',
         text: 'هل تم تغطية وحماية الافياش الخارجية؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'garden_wiring_installed',
         text: 'هل تم تمديد الكهرباء لمنطقة الزراعة الخارجية؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'rating',
@@ -223,33 +255,38 @@ const inspectionSections: InspectionSection[] = [
     questions: [
       {
         id: 'water_meter_working',
-        text: 'هل تم تركيب عداد المياه ويعمل بشكل جيد؟',
+        text: 'هل تم تركيب عداد المياة ويعمل بشكل جيد؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'garden_plumbing_installed',
         text: 'هل تم تأسيس السباكة لمنطقة الزراعة الخارجية؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'drains_good',
         text: 'هل تم تركيب الصفايات بشكل جيد ومقاومة للصداء؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'rain_gutters_installed',
-        text: 'هل تم تركيب مزراب للمواسير لتصريف مياه الامطار؟',
+        text: 'هل تم تركيب مزراب للمواسير لتصريف مياة الامطار؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'tank_covers_quality_good',
         text: 'هل تعتبر اغطية الخزانات والصرف الصحي ذات جودة عالية ومقاومة للانكسارات؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'rating',
@@ -264,52 +301,56 @@ const inspectionSections: InspectionSection[] = [
     questions: [
       {
         id: 'exterior_door_type',
-        text: 'نوع الأبواب الخارجية',
+        text: 'نوع الأبواب الخارجية؟',
         type: 'select',
         options: [
           { value: 'stainless_steel', label: 'حديد مقاوم للصداء' },
           { value: 'cladding', label: 'كلادينج' },
           { value: 'glass', label: 'زجاج' },
-          { value: 'steel', label: 'حديد غير مقاوم للصداء' },
+          { value: 'steel', label: 'حديد غير مقاوم لصداء' },
           { value: 'other', label: 'أخرى' }
         ]
       },
       {
         id: 'garage_door_type',
-        text: 'نوع أبواب مدخل السيارة',
+        text: 'نوع أبواب مدخل السيارة؟',
         type: 'select',
         options: [
           { value: 'roll', label: 'رول' },
           { value: 'stainless_steel', label: 'حديد مقاوم للصداء' },
           { value: 'cladding', label: 'كلادينج' },
           { value: 'glass', label: 'زجاج' },
-          { value: 'steel', label: 'حديد غير مقاوم للصداء' },
+          { value: 'steel', label: 'حديد غير مقاوم لصداء' },
           { value: 'other', label: 'أخرى' }
         ]
       },
       {
         id: 'smooth_operation',
-        text: 'هل سلاسة الفتح والاغلاق تعتبر جيدة للابواب الخارجية؟',
+        text: 'هل سلاسة الفتح والاغلاق تعتبرجيدة للابواب الخارجية؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'hardware_good',
         text: 'هل مقابض ومفصلات الأبواب الخارجية تعتبر جيدة؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'door_stoppers_installed',
         text: 'هل تم تركيب مصدات خلف الأبواب؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'weight_balance_good',
         text: 'هل تعتبر وزنية الأبواب الخارجية جيدة؟',
         type: 'boolean',
-        requiresPhoto: true
+        requiresPhoto: true,
+        requiresNote: true
       },
       {
         id: 'rating',
@@ -329,6 +370,8 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(true);
+  const [pdfGenerating, setPdfGenerating] = useState(false);
+  const reportRef = React.useRef<HTMLDivElement>(null);
 
   const handlePhotoUpload = (questionId: string, url: string) => {
     setPhotos(prev => ({
@@ -390,7 +433,7 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
 
   const generatePDF = async () => {
     try {
-      setLoading(true);
+      setPdfGenerating(true);
       
       // Create a new PDF document
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -465,11 +508,11 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
       // Save the PDF
       pdf.save('تقرير_فحص_العقار.pdf');
       
-      setLoading(false);
+      setPdfGenerating(false);
     } catch (error) {
       console.error('Error generating PDF:', error);
       setError('حدث خطأ أثناء إنشاء ملف PDF');
-      setLoading(false);
+      setPdfGenerating(false);
     }
   };
 
@@ -532,13 +575,13 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6"
+            className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[95vh] overflow-y-auto p-4 sm:p-6"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
@@ -562,7 +605,7 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                 <motion.div
                   animate={{ 
                     scale: [1, 1.2, 1],
-                    rotate: [0, 10, -10, 0]
+                    rotate: [0, 5, -5, 0]
                   }}
                   transition={{ duration: 0.5 }}
                   className="inline-block p-3 bg-emerald-100 rounded-full mb-4"
@@ -575,7 +618,7 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                   تم حفظ نتيجة الفحص وإكمال العملية
                 </p>
                 
-                <Button onClick={onComplete}>
+                <Button onClick={onComplete} className="w-full sm:w-auto">
                   العودة للطلبات
                 </Button>
               </motion.div>
@@ -595,7 +638,7 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                   key={`title-${currentSection.id}`}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="text-center"
+                  className="text-center rtl"
                 >
                   <h2 className="text-2xl font-bold mb-2">{currentSection.title}</h2>
                   <p className="text-gray-600">
@@ -610,16 +653,16 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="space-y-8"
+                    className="space-y-6"
                   >
                     {currentSection.questions.map((question) => (
                       <motion.div
                         key={question.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="space-y-4"
+                        className="space-y-3 p-3 bg-gray-50 rounded-xl"
                       >
-                        <h3 className="font-semibold text-lg">{question.text}</h3>
+                        <h3 className="font-semibold text-lg text-right">{question.text}</h3>
                         
                         {question.type === 'boolean' && (
                           <div className="flex gap-4">
@@ -650,7 +693,7 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                           <select
                             value={answers[currentSection.id]?.[question.id] || ''}
                             onChange={(e) => handleAnswer(currentSection.id, question.id, e.target.value)}
-                            className="w-full p-3 rounded-xl border-2 border-gray-200"
+                            className="w-full p-3 rounded-xl border-2 border-gray-200 text-right"
                           >
                             <option value="">اختر...</option>
                             {question.options?.map((option) => (
@@ -667,7 +710,7 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                               <button
                                 key={i}
                                 onClick={() => handleAnswer(currentSection.id, question.id, i + 1)}
-                                className={`w-10 h-10 rounded-full border-2 transition-colors ${
+                                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 transition-colors ${
                                   answers[currentSection.id]?.[question.id] === i + 1
                                     ? 'border-emerald-500 bg-emerald-50'
                                     : 'border-gray-200 hover:border-emerald-500'
@@ -684,12 +727,12 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                          answers[currentSection.id]?.[question.id] === false && (
                           <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                              الرجاء إضافة ملاحظة
+                              الرجاء إضافة ملاحظة:
                             </label>
                             <textarea
                               value={notes[`${currentSection.id}_${question.id}`] || ''}
                               onChange={(e) => handleNote(currentSection.id, question.id, e.target.value)}
-                              className="w-full p-3 rounded-xl border-2 border-gray-200"
+                              className="w-full p-3 rounded-xl border-2 border-gray-200 text-right"
                               rows={3}
                               placeholder="اكتب ملاحظاتك هنا..."
                             />
@@ -709,7 +752,7 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                 </AnimatePresence>
 
                 {/* Navigation Buttons */}
-                <div className="flex gap-4 mt-8">
+                <div className="flex gap-3 mt-6">
                   {currentStep > 0 && (
                     <Button
                       onClick={handlePrevious}
@@ -734,11 +777,26 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                   ) : (
                     <Button
                       onClick={handleSubmit}
-                      className="flex-1"
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-700"
                       disabled={loading}
                     >
-                      <CheckCircle className="w-5 h-5" />
-                      <span>حفظ التقرير</span>
+                      {loading ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className="w-5 h-5"
+                        >
+                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        </motion.div>
+                      ) : (
+                        <>
+                          <FileText className="w-5 h-5" />
+                          <span>حفظ التقرير</span>
+                        </>
+                      )}
                     </Button>
                   )}
                 </div>
@@ -749,7 +807,7 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg flex items-center gap-2"
+                className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg flex items-center gap-2 text-right"
               >
                 <AlertCircle className="w-5 h-5" />
                 <span>{error}</span>
@@ -759,7 +817,37 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
         </motion.div>
       )}
       
-      {loading && <LoadingSpinner />}
+      {(loading && !pdfGenerating) && <LoadingSpinner />}
+      
+      {pdfGenerating && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex flex-col items-center justify-center"
+        >
+          <motion.div
+            animate={{ 
+              rotate: 360 
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            className="w-16 h-16 mb-4"
+          >
+            <FileText className="w-full h-full text-white" />
+          </motion.div>
+          <p className="text-white text-lg font-bold">جاري إنشاء التقرير...</p>
+        </motion.div>
+      )}
+      
+      {/* Hidden div for PDF generation */}
+      <div className="hidden">
+        <div ref={reportRef} className="p-8 bg-white" dir="rtl">
+          {/* PDF content will be rendered here */}
+        </div>
+      </div>
     </AnimatePresence>
   );
 };

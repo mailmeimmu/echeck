@@ -14,8 +14,16 @@
 
 body {
   font-family: 'Cairo', sans-serif;
-  background-color: #f8fafc;
+  background-color: #f8fafc; 
   -webkit-tap-highlight-color: transparent;
+}
+
+.rtl {
+  direction: rtl;
+}
+
+.ltr {
+  direction: ltr;
 }
 
 @layer components {
@@ -59,6 +67,15 @@ body {
   
   .glass-card {
     @apply bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg border border-white/20 p-6;
+  }
+  
+  /* Photo uploader styles */
+  .photo-uploaded {
+    @apply bg-emerald-50 border-emerald-300;
+  }
+  
+  .photo-upload-button {
+    @apply transition-all duration-300 hover:shadow-md;
   }
 }
 
