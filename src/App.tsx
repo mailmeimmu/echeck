@@ -5,7 +5,7 @@ import { AdminDashboard } from './components/admin/AdminDashboard';
 import { BookingsPage } from './pages/admin/BookingsPage';
 import { EngineersPage } from './pages/admin/EngineersPage';
 import { ReportsPage } from './pages/admin/ReportsPage';
-import { EngineerDashboard } from './pages/EngineerDashboard'; // This should be your requests page
+import { EngineerDashboard } from './pages/EngineerDashboard';
 import { EngineerProfile } from './pages/EngineerProfile';
 import { AnimatePresence } from 'framer-motion';
 import { LoadingScreen } from './components/ui/LoadingScreen';
@@ -42,19 +42,19 @@ export default function App() {
 
           {/* Admin routes */}
           {user && isAdmin && (
-            <Route element={<AdminLayout />}>
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/bookings" element={<BookingsPage />} />
-              <Route path="/admin/engineers" element={<EngineersPage />} />
-              <Route path="/admin/reports" element={<ReportsPage />} />
-              <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="bookings" element={<BookingsPage />} />
+              <Route path="engineers" element={<EngineersPage />} />
+              <Route path="reports" element={<ReportsPage />} />
+              <Route path="*" element={<Navigate to="/admin" replace />} />
             </Route>
           )}
 
           {/* Engineer routes */}
           {user && isEngineer && (
             <Route path="/engineer" element={<EngineerLayout />}>
-              <Route index element={<EngineerDashboard />} /> {/* Requests page */}
+              <Route index element={<EngineerDashboard />} />
               <Route path="profile" element={<EngineerProfile />} />
               <Route path="*" element={<Navigate to="/engineer" replace />} />
             </Route>

@@ -2,13 +2,9 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import { Button } from '../ui/Button';
 import { LogOut, LayoutDashboard, Users, FileText, Home } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Outlet } from 'react-router-dom';
 
-interface AdminLayoutProps {
-  children: React.ReactNode;
-}
-
-export const AdminLayout = ({ children }: AdminLayoutProps) => {
+export const AdminLayout = () => {
   const { signOut } = useAuthStore();
   const location = useLocation();
 
@@ -63,7 +59,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
       {/* Main Content */}
       <main className="pt-20 min-h-screen bg-gray-50">
         <div className="max-w-6xl mx-auto px-6 py-8">
-          {children}
+          <Outlet />
         </div>
       </main>
 
