@@ -60,9 +60,12 @@ export const BookingsList = () => {
             name
           )
         `)
-        .in('status', ['pending']) // Only show pending bookings
+        .eq('status', 'pending') // Only show pending bookings
         .is('engineer_id', null)   // Only show unassigned bookings
         .order('created_at', { ascending: false });
+
+      // Debug: log what is returned from Supabase
+      console.log('Bookings fetch:', data, fetchError);
 
       if (fetchError) throw fetchError;
 
