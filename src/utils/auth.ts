@@ -44,19 +44,29 @@ const createProfileIfNeeded = async (userId: string, email: string, firstName?: 
 };
 
 const clearAuthState = async () => {
-  // Clear all local storage to remove any invalid tokens
-  localStorage.clear();
-  
-  // Sign out from Supabase
-  await supabase.auth.signOut();
-  
-  // Reset auth store state
-  useAuthStore.setState({ 
-    user: null,
-    isEngineer: false,
-    loading: false,
-    initialized: true
-  });
+  try {
+    // Clear all auth-related items from localStorage
+    const authKeys = Object.keys(localStorage).filter(key => 
+      key.startsWith('supabase.auth.') || 
+      key.includes('token') ||
+      key.includes('refresh')
+    );
+    
+    authKeys.forEach(key => localStorage.removeItem(key));
+    
+    // Sign out from Supabase
+    await supabase.auth.signOut();
+    
+    // Reset auth store state
+    useAuthStore.setState({ 
+      user: null,
+      isEngineer: false,
+      loading: false,
+      initialized: true
+    });
+  } catch (error) {
+    console.error('Error clearing auth state:', error);
+  }
 };
 
 export const initAuth = async () => {
@@ -84,28 +94,46 @@ export const initAuth = async () => {
     }
 
     try {
+      // Check if refresh token exists before attempting refresh
+      if (!session.refresh_token) {
+        console.warn('No refresh token found, clearing auth state');
+        await clearAuthState();
+        return;
+      }
+
       // Only attempt to refresh if we have a valid access token
       if (session.access_token) {
         const { error: refreshError } = await supabase.auth.refreshSession();
         
-        // If refresh fails, clear auth state and sign out
+        // Handle specific refresh token errors
         if (refreshError) {
           console.warn('Session refresh error:', refreshError.message);
-          await clearAuthState();
-          return;
+          if (refreshError.message.includes('refresh_token_not_found') || 
+              refreshError.message.includes('Invalid Refresh Token')) {
+            await clearAuthState();
+            return;
+          }
         }
       }
 
       // Get fresh session after potential refresh
       const { data: { session: freshSession } } = await supabase.auth.getSession();
       if (!freshSession) {
-        throw new Error('No session available');
+        console.warn('No fresh session available after refresh');
+        await clearAuthState();
+        return;
       }
 
       const [profile, isEngineer] = await Promise.all([
         createProfileIfNeeded(freshSession.user.id, freshSession.user.email!),
         checkEngineerStatus(freshSession.user.id)
       ]);
+
+      if (!profile) {
+        console.warn('Failed to create or fetch user profile');
+        await clearAuthState();
+        return;
+      }
 
       useAuthStore.setState({ 
         user: profile,
@@ -121,16 +149,17 @@ export const initAuth = async () => {
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
-        useAuthStore.setState({ 
-          user: null, 
-          isEngineer: false,
-          loading: false 
-        });
+        await clearAuthState();
         return;
       }
 
       if (event === 'TOKEN_REFRESHED') {
-        // Session was refreshed successfully, no need to do anything
+        // Verify the refreshed session is valid
+        if (!session?.access_token || !session?.refresh_token) {
+          console.warn('Invalid refreshed session');
+          await clearAuthState();
+          return;
+        }
         return;
       }
 
@@ -142,6 +171,10 @@ export const initAuth = async () => {
             checkEngineerStatus(session.user.id)
           ]);
 
+          if (!profile) {
+            throw new Error('Failed to create or fetch user profile');
+          }
+
           useAuthStore.setState({ 
             user: profile,
             isEngineer,
@@ -149,7 +182,7 @@ export const initAuth = async () => {
           });
         } catch (error) {
           console.error('Error updating user profile:', error);
-          useAuthStore.setState({ loading: false });
+          await clearAuthState();
         }
       }
     });

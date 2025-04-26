@@ -79,13 +79,17 @@ serve(async (req) => {
     // Generate password for the new user
     const password = generateSecurePassword();
 
+    // Declare authData in outer scope for cleanup
+    let authData: any = null;
+
     try {
       // Create auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      const { data, error: authError } = await supabase.auth.admin.createUser({
         email: request.email,
         password: password,
         email_confirm: true
       });
+      authData = data;
 
       if (authError) throw authError;
       if (!authData.user) throw new Error('Failed to create user');
