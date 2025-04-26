@@ -60,7 +60,7 @@ export const BookingsList = () => {
             name
           )
         `)
-        .eq('status', 'open')
+        .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
