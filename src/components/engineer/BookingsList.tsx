@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../ui/Button'; 
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { Calendar, Clock, Package, Building, MapPin, CheckCircle, XCircle, AlertCircle, RefreshCw, ListChecks, ClipboardList } from 'lucide-react';
+import { Calendar, Clock, Package, Building, MapPin, CheckCircle, XCircle, AlertCircle, RefreshCw, ListChecks, ClipboardList, FileText } from 'lucide-react';
 import { InspectionForm } from './InspectionForm';
 
 interface BookingCategory {
@@ -44,7 +44,7 @@ export const BookingsList = () => {
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
   const [selectedReason, setSelectedReason] = useState<string>('');
   const [rejectionNotes, setRejectionNotes] = useState('');
-  const [showInspectionForm, setShowInspectionForm] = useState(false);
+  const [showInspectionForm, setShowInspectionForm] = useState<string | null>(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [processingBooking, setProcessingBooking] = useState<string | null>(null);
   const [engineerId, setEngineerId] = useState<string | null>(null);
@@ -470,12 +470,11 @@ export const BookingsList = () => {
                       {booking.status === 'in_progress' && booking.engineer_id === engineerId && (
                         <Button
                           onClick={() => {
-                            setSelectedBooking(booking.id);
-                            setShowInspectionForm(true);
+                            setShowInspectionForm(booking.id);
                           }}
                           className="w-full"
                         >
-                          <CheckCircle className="w-5 h-5" />
+                          <FileText className="w-5 h-5" />
                           <span>إضافة تقرير الفحص</span>
                         </Button>
                       )}
@@ -489,12 +488,11 @@ export const BookingsList = () => {
       </motion.div>
 
       <AnimatePresence>
-        {showInspectionForm && selectedBooking && (
-          <InspectionForm
-            bookingId={selectedBooking}
+        {showInspectionForm && (
+          <InspectionForm 
+            bookingId={showInspectionForm}
             onComplete={() => {
-              setShowInspectionForm(false);
-              setSelectedBooking(null);
+              setShowInspectionForm(null);
               fetchBookings();
             }}
           />
