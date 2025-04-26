@@ -39,6 +39,7 @@ export const BookingsList = () => {
   const [rejectionNotes, setRejectionNotes] = useState('');
   const [showInspectionForm, setShowInspectionForm] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [processingBooking, setProcessingBooking] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('BookingsList mounted');
@@ -110,18 +111,41 @@ export const BookingsList = () => {
   };
 
   const handleAccept = async (bookingId: string) => {
+    if (processingBooking) return; // Prevent multiple simultaneous booking attempts
+
     try {
       setError(null);
-      setLoading(true);
+      setProcessingBooking(bookingId);
+
+      // First check if the booking is still available
+      const { data: booking, error: bookingError } = await supabase
+        .from('bookings')
+        .select('status')
+        .eq('id', bookingId)
+        .single();
+
+      if (bookingError) throw bookingError;
+
+      if (!booking || !['pending', 'open'].includes(booking.status)) {
+        await fetchBookings(); // Refresh the list to show current status
+        throw new Error('هذا الطلب لم يعد متاحاً. تم تحديث القائمة.');
+      }
 
       const { data, error } = await supabase.rpc('handle_engineer_response', {
         p_booking_id: bookingId,
         p_status: 'accepted'
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('not available') || error.message.includes('غير متاح')) {
+          await fetchBookings(); // Refresh list to show current status
+          throw new Error('تم حجز هذا الطلب من قبل مهندس آخر. تم تحديث القائمة.');
+        }
+        throw error;
+      }
+
       if (!data?.success) {
-        throw new Error('Failed to accept booking');
+        throw new Error('فشل في قبول الطلب');
       }
 
       await fetchBookings();
@@ -129,7 +153,7 @@ export const BookingsList = () => {
       console.error('Error accepting booking:', error);
       setError(error instanceof Error ? error.message : 'حدث خطأ في قبول الطلب');
     } finally {
-      setLoading(false);
+      setProcessingBooking(null);
     }
   };
 
@@ -139,6 +163,20 @@ export const BookingsList = () => {
     try {
       setError(null);
       setLoading(true);
+
+      // Check if the booking is still available before rejecting
+      const { data: booking, error: bookingError } = await supabase
+        .from('bookings')
+        .select('status')
+        .eq('id', selectedBooking)
+        .single();
+
+      if (bookingError) throw bookingError;
+
+      if (!booking || !['pending', 'open'].includes(booking.status)) {
+        await fetchBookings(); // Refresh the list to show current status
+        throw new Error('هذا الطلب لم يعد متاحاً. تم تحديث القائمة.');
+      }
 
       const { data, error } = await supabase.rpc('handle_engineer_response', {
         p_booking_id: selectedBooking,
@@ -156,7 +194,7 @@ export const BookingsList = () => {
       setRejectionNotes('');
     } catch (error) {
       console.error('Error rejecting booking:', error);
-      setError('حدث خطأ في رفض الطلب');
+      setError(error instanceof Error ? error.message : 'حدث خطأ في رفض الطلب');
     } finally {
       setLoading(false);
     }
@@ -311,8 +349,13 @@ export const BookingsList = () => {
                     <Button
                       onClick={() => handleAccept(booking.id)}
                       className="flex-1"
+                      disabled={processingBooking === booking.id}
                     >
-                      <CheckCircle className="w-5 h-5" />
+                      {processingBooking === booking.id ? (
+                        <LoadingSpinner className="w-5 h-5" />
+                      ) : (
+                        <CheckCircle className="w-5 h-5" />
+                      )}
                       <span>قبول الطلب</span>
                     </Button>
 
@@ -323,6 +366,7 @@ export const BookingsList = () => {
                         setSelectedBooking(booking.id);
                         setShowRejectModal(true);
                       }}
+                      disabled={processingBooking === booking.id}
                     >
                       <XCircle className="w-5 h-5" />
                       <span>رفض الطلب</span>
