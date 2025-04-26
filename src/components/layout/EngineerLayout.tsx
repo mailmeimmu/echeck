@@ -1,11 +1,8 @@
 import { motion } from 'framer-motion';
 import { EngineerNav } from './EngineerNav';
+import { Outlet } from 'react-router-dom';
 
-interface EngineerLayoutProps {
-  children: React.ReactNode;
-}
-
-export const EngineerLayout = ({ children }: EngineerLayoutProps) => (
+export const EngineerLayout = () => (
   <motion.div 
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -13,7 +10,7 @@ export const EngineerLayout = ({ children }: EngineerLayoutProps) => (
     className="min-h-screen bg-gray-50 pb-20 pt-12"
   >
     <div className="max-w-lg mx-auto">
-      {children}
+      <Outlet />
     </div>
     <EngineerNav />
   </motion.div>

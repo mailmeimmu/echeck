@@ -60,7 +60,8 @@ export const BookingsList = () => {
             name
           )
         `)
-        .eq('status', 'pending')
+        .in('status', ['pending', 'open']) // Show both pending and open bookings
+        .is('engineer_id', null)           // Only show unassigned bookings
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
