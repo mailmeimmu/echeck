@@ -48,7 +48,7 @@ export const EngineerDashboard = () => {
 
         <InspectionForm 
           bookingId={selectedBooking.id}
-          propertyType={selectedBooking.property_type.name}
+          propertyType={selectedBooking.property_type?.name}
         />
       </div>
     );
@@ -65,7 +65,7 @@ export const EngineerDashboard = () => {
         <p className="text-gray-600">إدارة طلبات الفحص والمعاينة</p>
       </motion.div>
 
-      {bookings.length === 0 ? (
+      {(!bookings || bookings.length === 0) ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

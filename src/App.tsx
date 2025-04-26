@@ -53,10 +53,10 @@ export default function App() {
 
           {/* Engineer routes */}
           {user && isEngineer && (
-            <Route element={<EngineerLayout />}>
-              <Route index path="/engineer" element={<EngineerDashboard />} /> {/* Requests page */}
-              <Route path="/engineer/profile" element={<EngineerProfile />} />
-              <Route path="/engineer/*" element={<Navigate to="/engineer" replace />} />
+            <Route path="/engineer" element={<EngineerLayout />}>
+              <Route index element={<EngineerDashboard />} /> {/* Requests page */}
+              <Route path="profile" element={<EngineerProfile />} />
+              <Route path="*" element={<Navigate to="/engineer" replace />} />
             </Route>
           )}
 
