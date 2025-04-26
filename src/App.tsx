@@ -13,7 +13,7 @@ import { AdminLayout } from './components/layout/AdminLayout';
 import { EngineerLayout } from './components/layout/EngineerLayout';
 import { useEffect, useState } from 'react';
 import { LandingPage } from './pages/Landing';
-import { ResetPassword } from './pages/ResetPassword';
+import { ResetPassword } from './components/auth/ResetPassword';
 
 function HashRedirector() {
   const location = useLocation();
