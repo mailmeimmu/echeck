@@ -41,13 +41,13 @@ export const BookingsList = () => {
   const [showRejectModal, setShowRejectModal] = useState(false);
 
   useEffect(() => {
+    console.log('BookingsList mounted');
     fetchBookings();
   }, []);
 
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      // Fetch available bookings
       const { data, error: fetchError } = await supabase
         .from('bookings')
         .select(`
@@ -60,8 +60,8 @@ export const BookingsList = () => {
             name
           )
         `)
-        .eq('status', 'pending') // Only show pending bookings
-        .is('engineer_id', null)   // Only show unassigned bookings
+        .eq('status', 'pending')
+        .is('engineer_id', null)
         .order('created_at', { ascending: false });
 
       // Debug: log what is returned from Supabase
@@ -69,6 +69,8 @@ export const BookingsList = () => {
 
       if (fetchError) throw fetchError;
 
+      setBookings(data || []);
+      console.log('Bookings set in state:', data || []);
       // Fetch rejection reasons
       const { data: reasonsData, error: reasonsError } = await supabase
         .from('rejection_reasons')
