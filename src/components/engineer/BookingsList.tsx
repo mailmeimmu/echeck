@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
+import { useOutletContext } from 'react-router-dom';
 import { Button } from '../ui/Button'; 
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { Calendar, Clock, Package, Building, MapPin, CheckCircle, XCircle, AlertCircle, RefreshCw, ListChecks, ClipboardList, FileText } from 'lucide-react';
 import { InspectionForm } from './InspectionForm';
+
+interface EngineerLayoutContext {
+  setShowInspectionForm: (show: boolean) => void;
+}
 
 interface BookingCategory {
   title: string;
@@ -47,12 +52,25 @@ export const BookingsList = () => {
   const [showInspectionForm, setShowInspectionForm] = useState<string | null>(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [processingBooking, setProcessingBooking] = useState<string | null>(null);
+  const { setShowInspectionForm: setLayoutShowInspectionForm } = useOutletContext<EngineerLayoutContext>();
   const [engineerId, setEngineerId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchBookings();
     // eslint-disable-next-line
   }, []);
+
+  // Notify the layout when inspection form opens or closes
+  useEffect(() => {
+    setLayoutShowInspectionForm(!!showInspectionForm);
+    
+    // Dispatch custom events for other components to listen to
+    if (showInspectionForm) {
+      window.dispatchEvent(new CustomEvent('inspection-form-open'));
+    } else {
+      window.dispatchEvent(new CustomEvent('inspection-form-close'));
+    }
+  }, [showInspectionForm, setLayoutShowInspectionForm]);
 
   const fetchBookings = async () => {
     try {
@@ -492,7 +510,9 @@ export const BookingsList = () => {
           <InspectionForm 
             bookingId={showInspectionForm}
             onComplete={() => {
+              // Close the inspection form
               setShowInspectionForm(null);
+              // Refresh bookings list
               fetchBookings();
             }}
           />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, X, Image as ImageIcon, Camera, Smartphone } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -14,9 +14,9 @@ export const PhotoUploader = ({ inspectionId, section, onUpload }: PhotoUploader
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
-  const [showOptions, setShowOptions] = useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const cameraInputRef = React.useRef<HTMLInputElement>(null);
+  const [showOptions, setShowOptions] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -76,7 +76,7 @@ export const PhotoUploader = ({ inspectionId, section, onUpload }: PhotoUploader
   };
 
   return (
-    <div className="relative mb-8">
+    <div className="relative mb-4 sm:mb-6">
       {/* Hidden file inputs */}
       <input
         ref={fileInputRef}
@@ -98,15 +98,15 @@ export const PhotoUploader = ({ inspectionId, section, onUpload }: PhotoUploader
       />
       
       {/* Photo upload button */}
-      <div className="mb-2 text-sm font-medium text-gray-700">
+      <div className="mb-2 text-xs sm:text-sm font-medium text-gray-700">
         {uploadedPhotos.length > 0 ? 'الصور المرفقة:' : 'إضافة صور:'}
       </div>
       
       {/* Display uploaded photos */}
       {uploadedPhotos.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="grid grid-cols-3 gap-2 mb-3">
           {uploadedPhotos.map((url, index) => (
-            <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+            <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 border border-emerald-100">
               <img 
                 src={url} 
                 alt={`صورة ${index + 1}`} 
@@ -119,34 +119,34 @@ export const PhotoUploader = ({ inspectionId, section, onUpload }: PhotoUploader
       
       {/* Main upload button */}
       {showOptions ? (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 mb-1">
           <Button
             type="button"
             variant="outline"
-            className="h-16 flex flex-col items-center justify-center"
+            className="h-14 sm:h-16 flex flex-col items-center justify-center"
             onClick={openCamera}
             disabled={uploading}
           >
-            <Camera className="w-6 h-6 mb-1 text-emerald-600" />
-            <span className="text-sm">التقاط صورة</span>
+            <Camera className="w-5 h-5 sm:w-6 sm:h-6 mb-1 text-emerald-600" />
+            <span className="text-xs sm:text-sm">التقاط صورة</span>
           </Button>
           
           <Button
             type="button"
             variant="outline"
-            className="h-16 flex flex-col items-center justify-center"
+            className="h-14 sm:h-16 flex flex-col items-center justify-center"
             onClick={openFileSelector}
             disabled={uploading}
           >
-            <Smartphone className="w-6 h-6 mb-1 text-emerald-600" />
-            <span className="text-sm">اختيار من الجهاز</span>
+            <Smartphone className="w-5 h-5 sm:w-6 sm:h-6 mb-1 text-emerald-600" />
+            <span className="text-xs sm:text-sm">اختيار من الجهاز</span>
           </Button>
         </div>
       ) : (
         <Button
           type="button"
           variant="outline"
-          className={`w-full h-16 flex flex-col items-center justify-center border-dashed ${
+          className={`w-full h-12 sm:h-16 flex flex-col items-center justify-center border-dashed ${
             uploadedPhotos.length > 0 ? 'bg-emerald-50 border-emerald-300' : ''
           }`}
           onClick={toggleOptions}
@@ -157,12 +157,12 @@ export const PhotoUploader = ({ inspectionId, section, onUpload }: PhotoUploader
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           >
-            <Upload className="w-6 h-6 text-emerald-600" />
+            <Upload className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
           </motion.div>
         ) : (
           <>
-            <ImageIcon className="w-6 h-6 mb-1 text-emerald-600" />
-            <span className="text-sm">{uploadedPhotos.length > 0 ? 'إضافة المزيد من الصور' : 'اضغط لإضافة صورة'}</span>
+            <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 mb-1 text-emerald-600" />
+            <span className="text-xs sm:text-sm">{uploadedPhotos.length > 0 ? 'إضافة المزيد من الصور' : 'اضغط لإضافة صورة'}</span>
           </>
         )}
       </Button>
@@ -172,7 +172,7 @@ export const PhotoUploader = ({ inspectionId, section, onUpload }: PhotoUploader
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-2 text-sm text-red-600 text-center"
+          className="mt-2 text-xs sm:text-sm text-red-600 text-center"
         >
           {error}
         </motion.div>

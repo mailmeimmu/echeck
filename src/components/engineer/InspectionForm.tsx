@@ -2,16 +2,16 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { CheckCircle, AlertCircle, Building, Shield, Home, Camera, ArrowRight, ArrowLeft, X, FileText } from 'lucide-react';
+import { CheckCircle, AlertCircle, ArrowRight, ArrowLeft, X, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PhotoUploader } from './PhotoUploader';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface InspectionFormProps {
   bookingId: string;
-  onComplete: () => void;
+  onComplete?: () => void; // Made optional with ?
 }
 
 interface Step {
@@ -361,7 +361,7 @@ const inspectionSections: InspectionSection[] = [
   }
 ];
 
-export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps) => {
+export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionFormProps) => { // Added default value
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [photos, setPhotos] = useState<Record<string, string[]>>({});
@@ -372,6 +372,17 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
   const [showModal, setShowModal] = useState(true);
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const reportRef = React.useRef<HTMLDivElement>(null);
+
+  // Notify parent components when the form opens or closes
+  useEffect(() => {
+    // Dispatch custom event when form opens
+    window.dispatchEvent(new CustomEvent('inspection-form-open'));
+    
+    return () => {
+      // Dispatch custom event when form closes
+      window.dispatchEvent(new CustomEvent('inspection-form-close'));
+    };
+  }, []);
 
   const handlePhotoUpload = (questionId: string, url: string) => {
     setPhotos(prev => ({
@@ -572,34 +583,28 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
     <AnimatePresence>
       {showModal && (
         <motion.div
+          key="inspection-form-modal"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-1 sm:p-4"
-          style={{ minHeight: '100vh' }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-0 sm:p-4 overflow-hidden"
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[95vh] overflow-y-auto p-2 sm:p-6"
-            style={{
-              minHeight: '60vh',
-              maxHeight: '95vh',
-              width: '100%',
-              boxSizing: 'border-box',
-            }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="bg-white rounded-2xl sm:rounded-3xl shadow-xl w-full h-full sm:w-[95%] sm:max-w-3xl sm:h-auto sm:max-h-[95vh] flex flex-col p-4 sm:p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="flex justify-between items-center mb-4 sm:mb-6">
-              <h2 className="text-lg sm:text-2xl font-bold">تقرير الفحص</h2>
+            {/* Close button */}
+            <div className="flex justify-between items-center mb-3 sm:mb-5 flex-shrink-0 sticky top-0 bg-white z-10 pb-2 border-b border-gray-100">
+              <h2 className="text-xl sm:text-2xl font-bold">تقرير الفحص</h2>
               <button
-                onClick={() => !loading && onComplete()}
+                onClick={() => !loading && onComplete?.()}
                 className="p-2 rounded-full hover:bg-gray-100"
                 disabled={loading}
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
             
@@ -607,7 +612,7 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-center p-8"
+                className="text-center p-4 sm:p-8 flex-grow flex flex-col items-center justify-center"
               >
                 <motion.div
                   animate={{ 
@@ -630,9 +635,9 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                 </Button>
               </motion.div>
             ) : (
-              <div className="space-y-8">
+              <div className="flex flex-col h-full overflow-hidden">
                 {/* Progress Bar */}
-                <div className="bg-gray-100 h-2 rounded-full overflow-hidden">
+                <div className="bg-gray-100 h-2 rounded-full overflow-hidden flex-shrink-0 mb-4">
                   <motion.div
                     className="h-full bg-emerald-500"
                     initial={{ width: 0 }}
@@ -645,10 +650,10 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                   key={`title-${currentSection.id}`}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="text-center rtl"
+                  className="text-center rtl py-2 sm:py-4 flex-shrink-0"
                 >
-                  <h2 className="text-2xl font-bold mb-2">{currentSection.title}</h2>
-                  <p className="text-gray-600">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2">{currentSection.title}</h2>
+                  <p className="text-gray-600 text-sm sm:text-base">
                     الخطوة {currentStep + 1} من {inspectionSections.length}
                   </p>
                 </motion.div>
@@ -660,22 +665,22 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="space-y-6"
+                    className="space-y-4 sm:space-y-6 overflow-y-auto flex-grow px-1 pb-4"
                   >
                     {currentSection.questions.map((question) => (
                       <motion.div
                         key={question.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="space-y-3 p-3 bg-gray-50 rounded-xl"
+                        className="space-y-3 p-3 sm:p-4 bg-gray-50 rounded-xl shadow-sm"
                       >
-                        <h3 className="font-semibold text-lg text-right">{question.text}</h3>
+                        <h3 className="font-semibold text-base sm:text-lg text-right">{question.text}</h3>
                         
                         {question.type === 'boolean' && (
-                          <div className="flex gap-4">
+                          <div className="flex gap-2 sm:gap-4">
                             <button
                               onClick={() => handleAnswer(currentSection.id, question.id, true)}
-                              className={`flex-1 p-3 rounded-xl border-2 transition-colors ${
+                              className={`flex-1 p-2 sm:p-3 rounded-xl border-2 transition-colors ${
                                 answers[currentSection.id]?.[question.id] === true
                                   ? 'border-emerald-500 bg-emerald-50'
                                   : 'border-gray-200 hover:border-emerald-500'
@@ -685,7 +690,7 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                             </button>
                             <button
                               onClick={() => handleAnswer(currentSection.id, question.id, false)}
-                              className={`flex-1 p-3 rounded-xl border-2 transition-colors ${
+                              className={`flex-1 p-2 sm:p-3 rounded-xl border-2 transition-colors ${
                                 answers[currentSection.id]?.[question.id] === false
                                   ? 'border-emerald-500 bg-emerald-50'
                                   : 'border-gray-200 hover:border-emerald-500'
@@ -700,7 +705,7 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                           <select
                             value={answers[currentSection.id]?.[question.id] || ''}
                             onChange={(e) => handleAnswer(currentSection.id, question.id, e.target.value)}
-                            className="w-full p-3 rounded-xl border-2 border-gray-200 text-right"
+                            className="w-full p-2 sm:p-3 rounded-xl border-2 border-gray-200 text-right"
                           >
                             <option value="">اختر...</option>
                             {question.options?.map((option) => (
@@ -712,12 +717,12 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                         )}
                         
                         {question.type === 'rating' && (
-                          <div className="flex flex-wrap gap-2">
+                          <div className="grid grid-cols-5 sm:grid-cols-10 gap-1 sm:gap-2">
                             {Array.from({ length: 10 }, (_, i) => (
                               <button
                                 key={i}
                                 onClick={() => handleAnswer(currentSection.id, question.id, i + 1)}
-                                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 transition-colors ${
+                                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 transition-colors ${
                                   answers[currentSection.id]?.[question.id] === i + 1
                                     ? 'border-emerald-500 bg-emerald-50'
                                     : 'border-gray-200 hover:border-emerald-500'
@@ -739,7 +744,7 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                             <textarea
                               value={notes[`${currentSection.id}_${question.id}`] || ''}
                               onChange={(e) => handleNote(currentSection.id, question.id, e.target.value)}
-                              className="w-full p-3 rounded-xl border-2 border-gray-200 text-right"
+                              className="w-full p-2 sm:p-3 rounded-xl border-2 border-gray-200 text-right"
                               rows={3}
                               placeholder="اكتب ملاحظاتك هنا..."
                             />
@@ -759,7 +764,7 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                 </AnimatePresence>
 
                 {/* Navigation Buttons */}
-                <div className="flex gap-3 mt-6">
+                <div className="flex gap-3 mt-2 sm:mt-4 pt-4 border-t border-gray-100 flex-shrink-0 sticky bottom-0 bg-white pb-1 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                   {currentStep > 0 && (
                     <Button
                       onClick={handlePrevious}
@@ -767,7 +772,7 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                       className="flex-1"
                       disabled={loading}
                     >
-                      <ArrowRight className="w-5 h-5" />
+                      <ChevronRight className="w-5 h-5" />
                       <span>السابق</span>
                     </Button>
                   )}
@@ -775,16 +780,16 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
                   {currentStep < inspectionSections.length - 1 ? (
                     <Button
                       onClick={handleNext}
-                      className="flex-1"
+                      className="flex-1 bg-emerald-500 hover:bg-emerald-600 shadow-md"
                       disabled={loading}
                     >
                       <span>التالي</span>
-                      <ArrowLeft className="w-5 h-5" />
+                      <ChevronLeft className="w-5 h-5" />
                     </Button>
                   ) : (
                     <Button
                       onClick={handleSubmit}
-                      className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 shadow-md"
                       disabled={loading}
                     >
                       {loading ? (
@@ -812,9 +817,9 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
 
             {error && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg flex items-center gap-2 text-right"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-3 p-3 bg-red-50 text-red-600 rounded-lg flex items-center gap-2 text-right flex-shrink-0 shadow-sm"
               >
                 <AlertCircle className="w-5 h-5" />
                 <span>{error}</span>

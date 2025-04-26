@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { Input } from '../components/ui/Input';
 import { getEngineerDetails } from '../utils/engineer';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { useOutletContext } from 'react-router-dom';
 
 interface EngineerDetails {
   id: string;
@@ -16,10 +17,15 @@ interface EngineerDetails {
   };
 }
 
+interface EngineerLayoutContext {
+  setShowInspectionForm: (show: boolean) => void;
+}
+
 export const EngineerProfile = () => {
   const { user } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [details, setDetails] = useState<EngineerDetails | null>(null);
+  const { setShowInspectionForm } = useOutletContext<EngineerLayoutContext>();
 
   useEffect(() => {
     const fetchDetails = async () => {
