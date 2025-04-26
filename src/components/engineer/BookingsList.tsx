@@ -79,15 +79,9 @@ export const BookingsList = () => {
           notes,
           engineer_id,
           package:packages(name, price),
-          property_type:property_types(name),
+          property_type:property_types(name)
         `)
-        .or(`
-          status.in.(pending,open),
-          and(
-            engineer_id.eq.${engineerData.id},
-            status.in.(engineer_assigned,in_progress,completed)
-          )
-        `)
+        .or(`status.in.(pending,open),and(engineer_id.eq.${engineerData.id},status.in.(engineer_assigned,in_progress,completed))`)
         .order('booking_date', { ascending: false });
 
       if (fetchError) {
