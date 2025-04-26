@@ -60,8 +60,8 @@ export const BookingsList = () => {
             name
           )
         `)
-        .in('status', ['pending', 'open']) // Show both pending and open bookings
-        .is('engineer_id', null)           // Only show unassigned bookings
+        .in('status', ['pending']) // Only show pending bookings
+        .is('engineer_id', null)   // Only show unassigned bookings
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
@@ -224,13 +224,13 @@ export const BookingsList = () => {
                 </div>
                 
                 <span className={`px-4 py-1.5 rounded-full text-sm font-medium ${
-                  booking.status === 'open' 
+                  booking.status === 'pending' 
                     ? 'bg-amber-50 text-amber-700'
                     : booking.status === 'engineer_assigned'
                     ? 'bg-blue-50 text-blue-700'
                     : 'bg-emerald-50 text-emerald-700'
                 }`}>
-                  {booking.status === 'open' ? 'متاح للحجز'
+                  {booking.status === 'pending' ? 'متاح للحجز'
                     : booking.status === 'engineer_assigned' ? 'تم القبول'
                     : 'جاري الفحص'}
                 </span>
@@ -270,7 +270,7 @@ export const BookingsList = () => {
               )}
 
               <div className="flex gap-2">
-                {booking.status === 'open' && (
+                {booking.status === 'pending' && (
                   <>
                     <Button
                       onClick={() => handleAccept(booking.id)}
