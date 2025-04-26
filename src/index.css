@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root[dir="rtl"] {
+  direction: rtl;
+}
+
+:root[dir="ltr"] {
+  direction: ltr;
+}
+
+body {
+  font-family: 'Cairo', sans-serif;
+  background-color: #f8fafc;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gradient-to-r from-emerald-500 to-emerald-600 
+           text-white px-6 py-3 rounded-2xl font-semibold 
+           shadow-lg shadow-emerald-100
+           hover:shadow-emerald-200 transition-all duration-300 
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-100 text-gray-700 hover:bg-gray-200
+           px-6 py-3 rounded-2xl font-semibold;
+  }
+
+  .btn-outline {
+    @apply border-2 border-emerald-500 text-emerald-600 
+           hover:bg-emerald-50 px-6 py-3 rounded-2xl font-semibold;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border border-gray-200
+           bg-white/80 backdrop-blur-sm
+           focus:ring-2 focus:ring-emerald-500 focus:border-transparent 
+           transition-all duration-300 outline-none
+           shadow-sm;
+  }
+
+  :root[dir="rtl"] .input-field {
+    @apply text-right;
+  }
+
+  :root[dir="ltr"] .input-field {
+    @apply text-left;
+  }
+  
+  .card {
+    @apply bg-white rounded-3xl shadow-sm border border-gray-100 p-6;
+  }
+  
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg border border-white/20 p-6;
+  }
+}
+
+/* Print styles */
+@media print {
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+
+  body {
+    background: white;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .print\:block {
+    display: block !important;
+  }
+
+  .print\:border {
+    border: 1px solid #e5e7eb !important;
+  }
+
+  .print\:border-2 {
+    border-width: 2px !important;
+  }
+
+  .print\:bg-white {
+    background-color: white !important;
+  }
+
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  .print\:text-black {
+    color: black !important;
+  }
+
+  .print\:grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+
+  .print\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .print\:aspect-\[3\/2\] {
+    aspect-ratio: 3/2 !important;
+  }
+
+  .print\:w-full {
+    width: 100% !important;
+  }
+
+  .print\:object-contain {
+    object-fit: contain !important;
+  }
+
+  .print\:max-h-none {
+    max-height: none !important;
+  }
+
+  .print\:overflow-visible {
+    overflow: visible !important;
+  }
+
+  .print\:pb-4 {
+    padding-bottom: 1rem !important;
+  }
+
+  .print\:pt-4 {
+    padding-top: 1rem !important;
+  }
+}

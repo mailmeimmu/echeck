@@ -1,0 +1,169 @@
+/*
+  # Clean Database and Create Example Users
+  
+  1. Changes
+    - Delete all existing data
+    - Create example admin user with @admin.check.sa domain
+    - Create example engineer user with @check.sa domain
+*/
+
+-- Delete data in correct order to respect foreign key constraints
+DELETE FROM inspection_photos;
+DELETE FROM inspection_systems;
+DELETE FROM inspection_safety;
+DELETE FROM inspection_notes;
+DELETE FROM inspection_tiles;
+DELETE FROM inspection_walls;
+DELETE FROM inspection_electrical;
+DELETE FROM inspection_plumbing;
+DELETE FROM inspection_doors;
+DELETE FROM inspections;
+DELETE FROM engineer_responses;
+DELETE FROM bookings;
+DELETE FROM engineer_requests;
+DELETE FROM engineers;
+DELETE FROM admin_users;
+DELETE FROM profiles;
+
+-- Delete storage objects
+DELETE FROM storage.objects 
+WHERE bucket_id = 'inspection-photos';
+
+-- Delete existing auth users using a function to handle permissions
+CREATE OR REPLACE FUNCTION delete_all_users()
+RETURNS void AS $$
+DECLARE
+  user_record RECORD;
+BEGIN
+  FOR user_record IN SELECT id FROM auth.users
+  LOOP
+    DELETE FROM auth.users WHERE id = user_record.id;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Execute the function to delete users
+SELECT delete_all_users();
+
+-- Drop the function after use
+DROP FUNCTION IF EXISTS delete_all_users();
+
+-- Create platform admin user
+INSERT INTO auth.users (
+  id,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  created_at,
+  updated_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  is_super_admin,
+  role
+) VALUES (
+  gen_random_uuid(),
+  'admin@admin.check.sa',
+  crypt('admin123', gen_salt('bf')),
+  now(),
+  now(),
+  now(),
+  '{"provider":"email","providers":["email"]}',
+  '{"first_name":"مدير النظام"}',
+  false,
+  'authenticated'
+) RETURNING id INTO admin_id;
+
+-- Create admin profile
+INSERT INTO profiles (
+  id,
+  email,
+  first_name,
+  created_at,
+  updated_at,
+  email_verified
+) 
+SELECT 
+  id,
+  email,
+  raw_user_meta_data->>'first_name',
+  created_at,
+  updated_at,
+  true
+FROM auth.users
+WHERE email = 'admin@admin.check.sa';
+
+-- Create admin user record
+INSERT INTO admin_users (
+  id,
+  email,
+  created_at
+)
+SELECT 
+  id,
+  email,
+  created_at
+FROM auth.users
+WHERE email = 'admin@admin.check.sa';
+
+-- Create engineer user
+INSERT INTO auth.users (
+  id,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  created_at,
+  updated_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  is_super_admin,
+  role
+) VALUES (
+  gen_random_uuid(),
+  'engineer@check.sa',
+  crypt('engineer123', gen_salt('bf')),
+  now(),
+  now(),
+  now(),
+  '{"provider":"email","providers":["email"]}',
+  '{"first_name":"أحمد المهندس"}',
+  false,
+  'authenticated'
+) RETURNING id INTO engineer_id;
+
+-- Create engineer profile
+INSERT INTO profiles (
+  id,
+  email,
+  first_name,
+  created_at,
+  updated_at,
+  email_verified
+)
+SELECT 
+  id,
+  email,
+  raw_user_meta_data->>'first_name',
+  created_at,
+  updated_at,
+  true
+FROM auth.users
+WHERE email = 'engineer@check.sa';
+
+-- Create engineer record
+INSERT INTO engineers (
+  id,
+  user_id,
+  id_number,
+  phone_number,
+  status,
+  created_at
+)
+SELECT 
+  id,
+  id,
+  '1234567890',
+  '0500000000',
+  'active',
+  created_at
+FROM auth.users
+WHERE email = 'engineer@check.sa';
