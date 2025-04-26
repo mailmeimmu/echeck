@@ -69,25 +69,20 @@ export const BookingsList = () => {
 
       console.log('Engineer data:', engineerData);
 
-      const { data, error: fetchError } = await supabase
+      const { data, error } = await supabase
         .from('bookings')
         .select(`
-          id,
-          status,
-          location,
-          booking_date,
-          booking_time,
-          notes,
-          engineer_id,
+          *,
           package:packages(name, price),
           property_type:property_types(name)
         `)
-        .or(`status.in.(pending,open),and(engineer_id.eq.${engineerData.id},status.in.(engineer_assigned,in_progress,completed))`)
-        .order('booking_date', { ascending: false });
+        .eq('status', 'pending')
+        .is('engineer_id', null)
+        .order('created_at', { ascending: false });
 
-      if (fetchError) {
-        console.error('Error fetching bookings:', fetchError);
-        throw fetchError;
+      if (error) {
+        console.error('Error fetching bookings:', error);
+        throw error;
       }
 
       console.log('Fetched bookings:', data);
