@@ -57,7 +57,6 @@ export default function App() {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<LandingPage />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Admin routes */}
           {user && isAdmin && (
