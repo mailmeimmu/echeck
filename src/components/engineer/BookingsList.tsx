@@ -132,9 +132,10 @@ export const BookingsList = () => {
       });
 
       if (error) {
-        if (error.message.includes('not available') || error.message.includes('غير متاح')) {
-          await fetchBookings(); // Refresh list to show current status
-          throw new Error('تم حجز هذا الطلب من قبل مهندس آخر. تم تحديث القائمة.');
+        if (error.message.includes('غير متاح') || error.message.includes('not available')) {
+          await fetchBookings(); // Refresh list
+          setError('تم حجز هذا الطلب أو لم يعد متاحاً. تم تحديث القائمة.');
+          return;
         }
         throw error;
       }
