@@ -575,18 +575,25 @@ export const InspectionForm = ({ bookingId, propertyType }: InspectionFormProps)
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-1 sm:p-4"
+          style={{ minHeight: '100vh' }}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[95vh] overflow-y-auto p-4 sm:p-6"
+            className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[95vh] overflow-y-auto p-2 sm:p-6"
+            style={{
+              minHeight: '60vh',
+              maxHeight: '95vh',
+              width: '100%',
+              boxSizing: 'border-box',
+            }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close button */}
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">تقرير الفحص</h2>
+            {/* Header */}
+            <div className="flex justify-between items-center mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-2xl font-bold">تقرير الفحص</h2>
               <button
                 onClick={() => !loading && onComplete()}
                 className="p-2 rounded-full hover:bg-gray-100"
