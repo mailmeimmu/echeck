@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import { AuthPage } from './pages/Auth';
 import { AdminDashboard } from './components/admin/AdminDashboard';
@@ -14,6 +14,23 @@ import { EngineerLayout } from './components/layout/EngineerLayout';
 import { useEffect, useState } from 'react';
 import { LandingPage } from './pages/Landing';
 import { ResetPassword } from './pages/ResetPassword';
+
+function HashRedirector() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (
+      location.pathname === '/' &&
+      location.hash.includes('access_token') &&
+      location.hash.includes('type=recovery')
+    ) {
+      navigate(`/reset-password${location.hash}`);
+    }
+  }, [location, navigate]);
+
+  return null;
+}
 
 export default function App() {
   const { user, initialized, isEngineer, isAdmin } = useAuthStore();
@@ -33,6 +50,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <HashRedirector />
       <AnimatePresence mode="wait">
         <Routes>
           {/* Public routes */}
