@@ -771,3 +771,114 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
                         
                         {question.type === 'select' && (
                           <select
+                            value={answers[currentSection.id]?.[question.id] || ''}
+                            onChange={(e) => handleAnswer(currentSection.id, question.id, e.target.value)}
+                            className="w-full p-2 sm:p-3 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:outline-none"
+                          >
+                            <option value="">اختر...</option>
+                            {question.options?.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+
+                        {question.type === 'rating' && (
+                          <div className="flex gap-2 flex-wrap">
+                            {[...Array(10)].map((_, i) => (
+                              <button
+                                key={i}
+                                onClick={() => handleAnswer(currentSection.id, question.id, i + 1)}
+                                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg border-2 transition-colors ${
+                                  answers[currentSection.id]?.[question.id] === i + 1
+                                    ? 'border-emerald-500 bg-emerald-50'
+                                    : 'border-gray-200 hover:border-emerald-500'
+                                }`}
+                              >
+                                {i + 1}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {question.requiresPhoto && (
+                          <div className="mt-4">
+                            <PhotoUploader
+                              onUpload={(url) => handlePhotoUpload(`${currentSection.id}_${question.id}`, url)}
+                              photos={photos[`${currentSection.id}_${question.id}`] || []}
+                            />
+                          </div>
+                        )}
+
+                        {question.requiresNote && answers[currentSection.id]?.[question.id] === false && (
+                          <div className="mt-4">
+                            <textarea
+                              value={notes[`${currentSection.id}_${question.id}`] || ''}
+                              onChange={(e) => handleNote(currentSection.id, question.id, e.target.value)}
+                              placeholder="أضف ملاحظاتك هنا..."
+                              className="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:outline-none resize-none h-24"
+                            />
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* Error Message */}
+                {error && (
+                  <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <p>{error}</p>
+                  </div>
+                )}
+
+                {/* Navigation Buttons */}
+                <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    onClick={handlePrevious}
+                    disabled={currentStep === 0}
+                    className="flex items-center gap-1"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                    السابق
+                  </Button>
+
+                  {currentStep === inspectionSections.length - 1 ? (
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={loading}
+                      className="flex items-center gap-2"
+                    >
+                      {loading ? (
+                        <>
+                          <LoadingSpinner />
+                          جاري الحفظ...
+                        </>
+                      ) : (
+                        <>
+                          <FileText className="w-4 h-4" />
+                          حفظ التقرير
+                        </>
+                      )}
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleNext}
+                      className="flex items-center gap-1"
+                    >
+                      التالي
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
