@@ -630,18 +630,18 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-0 sm:p-4 overflow-y-auto"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center p-0 sm:p-4 overflow-y-auto"
         >
           <BackButton />
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="bg-white rounded-2xl sm:rounded-3xl shadow-xl w-full h-full sm:w-[95%] sm:max-w-3xl sm:h-auto sm:max-h-[95vh] flex flex-col p-4 sm:p-6"
+            className="bg-white rounded-2xl sm:rounded-3xl shadow-xl w-full min-h-screen sm:min-h-0 sm:w-[95%] sm:max-w-3xl sm:max-h-[90vh] flex flex-col p-4 sm:p-6 my-0 sm:my-4"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
-            <div className="flex justify-between items-center mb-3 sm:mb-5 flex-shrink-0 sticky top-0 bg-white z-10 pb-2 border-b border-gray-100">
+            <div className="flex justify-between items-center mb-3 sm:mb-5 flex-shrink-0 sticky top-0 bg-white z-10 pb-2 border-b border-gray-100 pt-2">
               <h2 className="text-xl sm:text-2xl font-bold">تقرير الفحص</h2>
               <div className="flex items-center gap-2">
                 <Button
@@ -724,7 +724,7 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="space-y-4 sm:space-y-6 overflow-y-auto flex-grow px-1 pb-4"
+                    className="space-y-4 sm:space-y-6 overflow-y-auto flex-grow px-1 pb-4 max-h-[calc(100vh-16rem)] sm:max-h-[calc(90vh-16rem)]"
                   >
                     {currentSection.questions.map((question) => (
                       <motion.div
