@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase';
  */
 export async function withRetry<T>(
   operation: () => Promise<T>, 
-  maxRetries: number = 3
+  maxRetries: number = 5
 ): Promise<T> {
   let retries = 0;
   let lastError: Error | null = null;
@@ -20,13 +20,16 @@ export async function withRetry<T>(
       lastError = error instanceof Error ? error : new Error(String(error));
       retries++;
       
-      // Only retry on connection errors
+      // Retry on connection errors and timeout errors
       if (lastError.message.includes('network') || 
           lastError.message.includes('connection') ||
-          lastError.message.includes('timeout') ||
-          lastError.message.includes('fetch failed')) {
-        console.warn(`Database operation attempt ${retries} failed, retrying...`);
-        await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+          lastError.message.includes('timeout') || 
+          lastError.message.includes('fetch failed') ||
+          lastError.message.includes('aborted')) {
+        console.warn(`Database operation attempt ${retries}/${maxRetries} failed, retrying...`);
+        // Exponential backoff with jitter
+        const delay = Math.min(1000 * Math.pow(2, retries) + Math.random() * 1000, 10000);
+        await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }
       
@@ -45,10 +48,17 @@ export async function withRetry<T>(
  */
 export async function checkDatabaseConnection() {
   try {
+    // Set a timeout for the health check
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
     const start = Date.now();
     const { data, error } = await supabase
       .from('profiles')
-      .select('count', { count: 'exact', head: true });
+      .select('count', { count: 'exact', head: true })
+      .abortSignal(controller.signal);
+    
+    clearTimeout(timeoutId);
     
     const latency = Date.now() - start;
     
@@ -70,11 +80,17 @@ export async function checkDatabaseConnection() {
  * Clear Supabase cache to ensure fresh data
  */
 export function clearSupabaseCache() {
-  // This is a workaround to force Supabase to refetch data
-  // by invalidating the React Query cache for all queries
+  // Invalidate React Query cache for all queries
   if (window.queryClient) {
     window.queryClient.invalidateQueries();
   }
+  
+  // Clear localStorage cache for Supabase
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('sb-') && key.includes('cache')) {
+      localStorage.removeItem(key);
+    }
+  });
 }
 
 /**
@@ -83,10 +99,14 @@ export function clearSupabaseCache() {
 export function initDatabaseMonitoring() {
   // Check connection every minute
   setInterval(async () => {
-    const status = await checkDatabaseConnection();
-    if (!status.isConnected) {
-      console.warn('Database connection lost, attempting to reconnect...');
-      clearSupabaseCache();
+    try {
+      const status = await checkDatabaseConnection();
+      if (!status.isConnected) {
+        console.warn('Database connection lost, attempting to reconnect...');
+        clearSupabaseCache();
+      }
+    } catch (error) {
+      console.error('Error checking database connection:', error);
     }
   }, 60000);
   
@@ -94,9 +114,21 @@ export function initDatabaseMonitoring() {
   window.addEventListener('online', () => {
     console.log('Network connection restored, refreshing database connection');
     clearSupabaseCache();
+    // Force refresh auth session
+    supabase.auth.refreshSession();
   });
   
   window.addEventListener('offline', () => {
     console.warn('Network connection lost');
+  });
+  
+  // Add unhandled rejection handler for fetch errors
+  window.addEventListener('unhandledrejection', (event) => {
+    if (event.reason && 
+        typeof event.reason.message === 'string' && 
+        event.reason.message.includes('fetch')) {
+      console.warn('Unhandled fetch error detected, clearing cache:', event.reason);
+      clearSupabaseCache();
+    }
   });
 }

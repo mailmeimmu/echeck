@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, X, CheckCircle, Save, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../ui/Button';
-import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { LoadingSpinner } from '../ui/LoadingSpinner'; 
 import { BackButton } from '../ui/BackButton';
 import { useInspectionDraft } from '../../hooks/useInspectionDraft';
 import { useEngineer } from '../../hooks/useEngineer';
@@ -380,10 +380,9 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
   const [showPreview, setShowPreview] = useState(false);
   const reportRef = React.useRef<HTMLDivElement>(null);
   
-  // Scroll to top when form opens
   useEffect(() => {
     // Force scroll to top when the form opens
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     
     // Prevent body scrolling when modal is open
     document.body.style.overflow = 'hidden';
@@ -601,7 +600,7 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center p-0 sm:p-4 overflow-y-auto"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-0 sm:p-4"
           onClick={() => !loading && onComplete?.()}
         >
           <BackButton />
@@ -609,7 +608,7 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="bg-white rounded-2xl sm:rounded-3xl shadow-xl w-full min-h-screen sm:min-h-0 sm:w-[95%] sm:max-w-3xl sm:max-h-[90vh] flex flex-col p-4 sm:p-6 my-0 sm:my-4"
+            className="bg-white rounded-2xl sm:rounded-3xl shadow-xl w-full min-h-screen sm:min-h-0 sm:w-[95%] sm:max-w-3xl sm:max-h-[90vh] flex flex-col p-4 sm:p-6 my-0 sm:my-4 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
@@ -789,41 +788,41 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Navigation Buttons */}
-                <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100 flex-shrink-0">
+              {/* Navigation Buttons */}
+              <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100 flex-shrink-0 sticky bottom-0 bg-white z-10">
+                <Button
+                  variant="outline"
+                  onClick={handlePrevious}
+                  disabled={currentStep === 0}
+                  className="flex items-center gap-2"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                  السابق
+                </Button>
+
+                {currentStep === inspectionSections.length - 1 ? (
                   <Button
-                    variant="outline"
-                    onClick={handlePrevious}
-                    disabled={currentStep === 0}
+                    onClick={handleSubmit}
+                    disabled={loading}
                     className="flex items-center gap-2"
                   >
-                    <ChevronRight className="w-4 h-4" />
-                    السابق
+                    {loading ? (
+                      <LoadingSpinner className="w-4 h-4" />
+                    ) : (
+                      <FileText className="w-4 h-4" />
+                    )}
+                    حفظ التقرير
                   </Button>
-
-                  {currentStep === inspectionSections.length - 1 ? (
-                    <Button
-                      onClick={handleSubmit}
-                      disabled={loading}
-                      className="flex items-center gap-2"
-                    >
-                      {loading ? (
-                        <LoadingSpinner className="w-4 h-4" />
-                      ) : (
-                        <FileText className="w-4 h-4" />
-                      )}
-                      حفظ التقرير
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleNext}
-                      className="flex items-center gap-2"
-                    >
-                      التالي
-                      <ChevronLeft className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
+                ) : (
+                  <Button
+                    onClick={handleNext}
+                    className="flex items-center gap-2"
+                  >
+                    التالي
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
 
                 {error && (
                   <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg flex items-center gap-2">
