@@ -7,16 +7,22 @@ import { supabase } from '../../lib/supabase';
 interface PhotoUploaderProps {
   inspectionId: string;
   section: string;
+  photos?: string[];
   onUpload: (url: string) => void;
 }
 
-export const PhotoUploader = ({ inspectionId, section, onUpload }: PhotoUploaderProps) => {
+export const PhotoUploader = ({ inspectionId, section, photos = [], onUpload }: PhotoUploaderProps) => {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
+  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>(photos);
   const [showOptions, setShowOptions] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // Update uploadedPhotos when photos prop changes
+  useEffect(() => {
+    setUploadedPhotos(photos);
+  }, [photos]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -36,18 +42,53 @@ export const PhotoUploader = ({ inspectionId, section, onUpload }: PhotoUploader
         throw new Error('حجم الصورة يجب أن لا يتجاوز 5 ميجابايت');
       }
 
-      // Upload to Supabase Storage
-      const fileName = `${inspectionId}/${section}/${Date.now()}-${file.name}`;
-      const { data, error: uploadError } = await supabase.storage
-        .from('inspection-photos')
-        .upload(fileName, file);
+      // Upload to Supabase Storage with retry logic
+      let attempts = 0;
+      const maxAttempts = 3;
+      let lastError = null;
+      let data = null;
+      
+      while (attempts < maxAttempts) {
+        try {
+          const fileName = `${inspectionId}/${section}/${Date.now()}-${file.name}`;
+          const result = await supabase.storage
+            .from('inspection-photos')
+            .upload(fileName, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
+            
+          if (result.error) throw result.error;
+          data = result.data;
+          break; // Success, exit loop
+        } catch (error) {
+          lastError = error;
+          attempts++;
+          
+          // Only retry on connection errors
+          if (error instanceof Error && 
+              (error.message.includes('network') || 
+               error.message.includes('connection') ||
+               error.message.includes('timeout'))) {
+            console.warn(`Upload attempt ${attempts} failed, retrying...`);
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+            continue;
+          }
+          
+          // For other errors, throw immediately
+          throw error;
+        }
+      }
+      
+      // If we've exhausted retries, throw the last error
+      if (!data && lastError) throw lastError;
 
-      if (uploadError) throw uploadError;
+      if (!data) throw new Error('فشل تحميل الصورة');
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('inspection-photos')
-        .getPublicUrl(fileName);
+        .getPublicUrl(data.path);
       
       setUploadedPhotos(prev => [...prev, publicUrl]);
       onUpload(publicUrl);
@@ -56,6 +97,9 @@ export const PhotoUploader = ({ inspectionId, section, onUpload }: PhotoUploader
       setError(err instanceof Error ? err.message : 'حدث خطأ في رفع الصورة');
     } finally {
       setUploading(false);
+      // Reset file input
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (cameraInputRef.current) cameraInputRef.current.value = '';
     }
   };
 
@@ -111,6 +155,13 @@ export const PhotoUploader = ({ inspectionId, section, onUpload }: PhotoUploader
                 src={url} 
                 alt={`صورة ${index + 1}`} 
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Retry loading image with cache busting
+                  const target = e.target as HTMLImageElement;
+                  if (!target.src.includes('?')) {
+                    target.src = `${url}?t=${Date.now()}`;
+                  }
+                }}
               />
             </div>
           ))}
