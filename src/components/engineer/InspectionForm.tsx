@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileText, X, CheckCircle, Camera, ArrowRight, Save, AlertCircle, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, X, CheckCircle, Camera, ArrowRight, Save, AlertCircle, ArrowLeft, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { BackButton } from '../ui/BackButton';
@@ -377,6 +377,7 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(true);
   const [pdfGenerating, setPdfGenerating] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const reportRef = React.useRef<HTMLDivElement>(null);
   
@@ -388,6 +389,7 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
   const {
     draft,
     saveDraft,
+    isSuccess,
     isSaving,
     deleteDraft
   } = useInspectionDraft(bookingId, engineer?.id || '');
@@ -603,6 +605,11 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
         p_doors_data: answers.doors,
         p_photos: photos,
         p_notes: notes
+      }, {
+        onSuccess: () => {
+          setSaveSuccess(true);
+          setTimeout(() => setSaveSuccess(false), 3000);
+        }
       });
 
       // Generate PDF report
@@ -648,10 +655,16 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                   variant="outline"
                   size="sm"
                   onClick={() => {
+                    setSaveSuccess(false);
                     saveDraft({
                       answers,
                       photos,
                       notes
+                    }, {
+                      onSuccess: () => {
+                        setSaveSuccess(true);
+                        setTimeout(() => setSaveSuccess(false), 3000);
+                      }
                     });
                   }}
                   disabled={isSaving}
@@ -664,9 +677,11 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                       <Save className="w-4 h-4" />
                     </motion.div>
                   ) : (
-                    <Save className="w-4 h-4" />
+                    saveSuccess ? <Check className="w-4 h-4 text-emerald-500" /> : <Save className="w-4 h-4" />
                   )}
-                  <span>{isSaving ? 'جاري الحفظ...' : 'حفظ المسودة'}</span>
+                  <span>
+                    {isSaving ? 'جاري الحفظ...' : saveSuccess ? 'تم الحفظ' : 'حفظ المسودة'}
+                  </span>
                 </Button>
                 <button
                   onClick={() => !loading && onComplete?.()}
@@ -677,6 +692,21 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                 </button>
               </div>
             </div>
+
+            {/* Save Success Message */}
+            <AnimatePresence>
+              {saveSuccess && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="bg-emerald-50 text-emerald-700 p-3 rounded-lg mb-4 flex items-center gap-2"
+                >
+                  <CheckCircle className="w-5 h-5" />
+                  <span>تم حفظ المسودة بنجاح</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
             
             {success ? (
               <motion.div
