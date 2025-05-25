@@ -474,6 +474,11 @@ export const BaseInspectionForm = ({
     if (!selectedPropertyType) {
       // Step 1: Property Type Selection and Order Details
       return (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="overflow-y-auto max-h-[calc(100vh-16rem)]"
+        >
         <div className="space-y-6">
           <div className="p-4 bg-gray-50 rounded-xl">
             <h3 className="font-bold text-lg mb-4">بيانات الطلب</h3>
@@ -578,10 +583,17 @@ export const BaseInspectionForm = ({
             </div>
           </div>
         </div>
+        </motion.div>
       );
     } else if (!selectedArea) {
       // Step 2: Area Selection
       const propertyType = propertyTypes.find(pt => pt.id === selectedPropertyType);
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="overflow-y-auto max-h-[calc(100vh-16rem)]"
+        >
       if (!propertyType) return null;
       
       return (
@@ -605,13 +617,18 @@ export const BaseInspectionForm = ({
             </div>
           </div>
         </div>
+        </motion.div>
       );
     } else {
       // Step 3: Section Questions
       if (!currentSection) return null;
       
       return (
-        <div className="space-y-4 sm:space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4 sm:space-y-6 overflow-y-auto max-h-[calc(100vh-16rem)]"
+        >
           {currentSection.questions.map((question) => {
             // Skip conditional questions that don't apply
             if (question.conditional) {
@@ -743,7 +760,7 @@ export const BaseInspectionForm = ({
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       );
     }
   };
