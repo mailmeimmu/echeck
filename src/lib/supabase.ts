@@ -75,12 +75,12 @@ async function customFetch(input: RequestInfo | URL, init?: RequestInit): Promis
   throw lastError || new Error('Failed to fetch after multiple retries');
 }
 
-// Add connection health check
+// Add connection health check using packages table which has public access
 export const checkConnection = async () => {
   try {
     const start = Date.now();
     const { data, error } = await supabase
-      .from('profiles')
+      .from('packages')
       .select('count', { count: 'exact', head: true });
     
     const latency = Date.now() - start;
