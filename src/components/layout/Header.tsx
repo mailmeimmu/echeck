@@ -2,16 +2,10 @@ import { motion } from 'framer-motion';
 import { Package, LogOut, User, LogIn } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { useLanguage } from '../../utils/i18n';
 import { Button } from '../ui/Button';
 
 export const Header = () => {
   const { user, signOut } = useAuthStore();
-  const { language, setLanguage, t } = useLanguage();
-
-  const toggleLanguage = () => {
-    setLanguage(language === 'ar' ? 'en' : 'ar');
-  };
 
   return (
     <motion.header
@@ -26,15 +20,6 @@ export const Header = () => {
         </Link>
 
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleLanguage}
-            className="min-w-[48px]"
-          >
-            {language === 'ar' ? 'EN' : 'AR'}
-          </Button>
-
           {user ? (
             <>
               <Link to="/dashboard">
@@ -50,14 +35,14 @@ export const Header = () => {
                 onClick={signOut}
               >
                 <LogOut className="w-4 h-4" />
-                <span>{t('common', 'logout')}</span>
+                <span>خروج</span>
               </Button>
             </>
           ) : (
             <Link to="/auth">
               <Button variant="primary" size="sm">
                 <LogIn className="w-4 h-4" />
-                <span>{t('auth', 'login')}</span>
+                <span>تسجيل الدخول</span>
               </Button>
             </Link>
           )}

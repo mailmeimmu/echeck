@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
+import { PageWrapper } from './components/layout/PageWrapper';
 import { AuthPage } from './pages/Auth';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { BookingsPage } from './pages/admin/BookingsPage';
@@ -51,7 +52,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <HashRedirector />
-      <AnimatePresence mode="wait">
+      <PageWrapper>
         <Routes>
           {/* Public routes */}
           <Route path="/auth" element={<AuthPage />} />
@@ -89,7 +90,7 @@ export default function App() {
               : <Navigate to="/" replace />
           } />
         </Routes>
-      </AnimatePresence>
+      </PageWrapper>
     </BrowserRouter>
   );
 }
