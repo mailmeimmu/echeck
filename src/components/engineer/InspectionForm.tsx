@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { FileText, X, CheckCircle, Camera, ArrowRight, Save } from 'lucide-react';
+import { FileText, X, CheckCircle, Camera, ArrowRight, Save, AlertCircle, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { BackButton } from '../ui/BackButton';
 import { useInspectionDraft } from '../../hooks/useInspectionDraft';
 import { useEngineer } from '../../hooks/useEngineer';
 import { useAuthStore } from '../../store/authStore';
-import { CheckCircle, AlertCircle, ArrowRight, ArrowLeft, X, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PhotoUploader } from './PhotoUploader';
 import html2canvas from 'html2canvas';
@@ -760,6 +759,7 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                             value={answers[currentSection.id]?.[question.id] || ''}
                             onChange={(e) => handleAnswer(currentSection.id, question.id, e.target.value)}
                             className="w-full p-2 sm:p-3 rounded-xl border-2 border-gray-200 text-right"
+                          
                           >
                             <option value="">اختر...</option>
                             {question.options?.map((option) => (
