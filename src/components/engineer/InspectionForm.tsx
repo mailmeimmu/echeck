@@ -1,19 +1,17 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { createClient } from '@supabase/supabase-js';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { supabase } from '../../lib/supabase';
+import { useInspectionDraft } from '../../hooks/useInspectionDraft';
 
 interface InspectionFormProps {
   bookingId: string;
-  engineerId: string;
-  onSubmit?: () => void;
+  onComplete?: () => void;
 }
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+export const InspectionForm = ({ bookingId, onComplete }: InspectionFormProps) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  const { draft, saveDraft, isSaving } = useInspectionDraft(bookingId, user?.id || '');
 
-export default function InspectionForm({ bookingId, engineerId, onSubmit }: InspectionFormProps) {
   const [formData, setFormData] = useState({
     property_age: '',
     total_area: '',
@@ -29,12 +27,20 @@ export default function InspectionForm({ bookingId, engineerId, onSubmit }: Insp
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    if (draft?.data) {
+      setFormData(draft.data);
+    }
+  }, [draft]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    const newData = {
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }));
+    };
+    setFormData(newData);
+    saveDraft(newData);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,7 +53,7 @@ export default function InspectionForm({ bookingId, engineerId, onSubmit }: Insp
         .from('inspections')
         .insert({
           booking_id: bookingId,
-          engineer_id: engineerId,
+          engineer_id: user?.id,
           ...formData,
           property_age: parseInt(formData.property_age),
           total_area: parseFloat(formData.total_area),
@@ -56,7 +62,7 @@ export default function InspectionForm({ bookingId, engineerId, onSubmit }: Insp
 
       if (submitError) throw submitError;
 
-      onSubmit?.();
+      onComplete?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit inspection');
     } finally {
@@ -67,7 +73,12 @@ export default function InspectionForm({ bookingId, engineerId, onSubmit }: Insp
   const conditions = ['excellent', 'good', 'fair', 'poor'];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <motion.form
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      onSubmit={handleSubmit}
+      className="space-y-6 bg-white p-6 rounded-xl shadow-lg"
+    >
       <div className="space-y-4">
         <div>
           <label htmlFor="property_age" className="block text-sm font-medium text-gray-700">
@@ -242,8 +253,5 @@ export default function InspectionForm({ bookingId, engineerId, onSubmit }: Insp
           {isSubmitting ? 'Submitting...' : 'Submit Inspection'}
         </button>
       </div>
-    </form>
+    </motion.form>
   );
-}
-
-export { InspectionForm }
