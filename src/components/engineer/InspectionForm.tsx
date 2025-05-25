@@ -378,6 +378,7 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
   const [showModal, setShowModal] = useState(true);
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const reportRef = React.useRef<HTMLDivElement>(null);
   
   // Scroll to top when form opens
@@ -647,11 +648,15 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => saveDraft({
-                    answers,
-                    photos,
-                    notes
-                  })}
+                  onClick={() => {
+                    saveDraft({
+                      answers,
+                      photos,
+                      notes
+                    });
+                    setSaveSuccess(true);
+                    setTimeout(() => setSaveSuccess(false), 3000);
+                  }}
                   disabled={isSaving}
                 >
                   <Save className="w-4 h-4" />
@@ -666,6 +671,21 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                 </button>
               </div>
             </div>
+            
+            {/* Save Success Message */}
+            <AnimatePresence>
+              {saveSuccess && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="bg-emerald-50 text-emerald-600 p-3 rounded-lg mb-4 flex items-center gap-2 shadow-sm"
+                >
+                  <CheckCircle className="w-5 h-5" />
+                  <span>تم حفظ المسودة بنجاح</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
             
             {success ? (
               <motion.div
@@ -743,265 +763,4 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                                 answers[currentSection.id]?.[question.id] === true
                                   ? 'border-emerald-500 bg-emerald-50'
                                   : 'border-gray-200 hover:border-emerald-500'
-                              }`}
-                            >
-                              نعم
-                            </button>
-                            <button
-                              onClick={() => handleAnswer(currentSection.id, question.id, false)}
-                              className={`flex-1 p-2 sm:p-3 rounded-xl border-2 transition-colors ${
-                                answers[currentSection.id]?.[question.id] === false
-                                  ? 'border-emerald-500 bg-emerald-50'
-                                  : 'border-gray-200 hover:border-emerald-500'
-                              }`}
-                            >
-                              لا
-                            </button>
-                          </div>
-                        )}
-                        
-                        {question.type === 'select' && (
-                          <select
-                            value={answers[currentSection.id]?.[question.id] || ''}
-                            onChange={(e) => handleAnswer(currentSection.id, question.id, e.target.value)}
-                            className="w-full p-2  sm:p-3 rounded-xl border-2 border-gray-200 text-right"
-                          
-                          >
-                            <option value="">اختر...</option>
-                            {question.options?.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                        
-                        {question.type === 'rating' && (
-                          <div className="grid grid-cols-5 sm:grid-cols-10 gap-1 sm:gap-2">
-                            {Array.from({ length: 10 }, (_, i) => (
-                              <button
-                                key={i}
-                                onClick={() => handleAnswer(currentSection.id, question.id, i + 1)}
-                                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 transition-colors ${
-                                  answers[currentSection.id]?.[question.id] === i + 1
-                                    ? 'border-emerald-500 bg-emerald-50'
-                                    : 'border-gray-200 hover:border-emerald-500'
-                                }`}
-                              >
-                                {i + 1}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Show notes input if answer is "No" and notes are required */}
-                        {question.requiresNote && 
-                         answers[currentSection.id]?.[question.id] === false && (
-                          <div className="mt-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              الرجاء إضافة ملاحظة:
-                            </label>
-                            <textarea
-                              value={notes[`${currentSection.id}_${question.id}`] || ''}
-                              onChange={(e) => handleNote(currentSection.id, question.id, e.target.value)}
-                              className="w-full p-2 sm:p-3 rounded-xl border-2 border-gray-200 text-right"
-                              rows={3}
-                              placeholder="اكتب ملاحظاتك هنا..."
-                            />
-                          </div>
-                        )}
-                        
-                        {question.requiresPhoto && (
-                          <PhotoUploader
-                            inspectionId={bookingId}
-                            section={`${currentSection.id}_${question.id}`}
-                            onUpload={(url) => handlePhotoUpload(`${currentSection.id}_${question.id}`, url)}
-                          />
-                        )}
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </AnimatePresence>
-
-                {/* Navigation Buttons */}
-                <div className="flex gap-3 mt-2 sm:mt-4 pt-4 border-t border-gray-100 flex-shrink-0 sticky bottom-0 bg-white pb-1 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-                  {currentStep > 0 && (
-                    <Button
-                      onClick={handlePrevious}
-                      variant="secondary"
-                      className="flex-1"
-                      disabled={loading}
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                      <span>السابق</span>
-                    </Button>
-                  )}
-                  
-                  {currentStep < inspectionSections.length - 1 ? (
-                    <Button
-                      onClick={handleNext}
-                      className="flex-1 bg-emerald-500 hover:bg-emerald-600 shadow-md"
-                      disabled={loading}
-                    >
-                      <span>التالي</span>
-                      <ChevronLeft className="w-5 h-5" />
-                    </Button>
-                  ) : (
-                  <div className="flex gap-2 w-full">
-                    <Button
-                      onClick={() => setShowPreview(true)}
-                      className="flex-1"
-                      disabled={loading}
-                    >
-                      <FileText className="w-5 h-5" />
-                      <span>معاينة التقرير</span>
-                    </Button>
-                    <Button
-                      onClick={handleSubmit}
-                      className="flex-1"
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          className="w-5 h-5"
-                        >
-                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                        </motion.div>
-                      ) : (
-                        <>
-                          <CheckCircle className="w-5 h-5" />
-                          <span>إرسال التقرير</span>
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  )}
-                </div>
-              </div>
-            )}
-          {/* Preview Modal */}
-          <AnimatePresence>
-            {showPreview && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
-                onClick={() => setShowPreview(false)}
-              >
-                <motion.div
-                  initial={{ scale: 0.95, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.95, opacity: 0 }}
-                  className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6"
-                  onClick={e => e.stopPropagation()}
-                >
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-2xl font-bold">معاينة التقرير</h3>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowPreview(false)}
-                    >
-                      <X className="w-5 h-5" />
-                      <span>إغلاق</span>
-                    </Button>
-                  </div>
-
-                  {/* Preview content */}
-                  <div className="space-y-6">
-                    {inspectionSections.map((section, index) => (
-                      <div key={section.id} className="border rounded-xl p-4">
-                        <h4 className="font-bold text-lg mb-4">{section.title}</h4>
-                        <div className="space-y-4">
-                          {section.questions.map(question => (
-                            <div key={question.id} className="space-y-2">
-                              <p className="font-medium">{question.text}</p>
-                              <p className="text-gray-600">
-                                {answers[section.id]?.[question.id]}
-                              </p>
-                              {notes[`${section.id}_${question.id}`] && (
-                                <p className="text-sm text-gray-500">
-                                  ملاحظات: {notes[`${section.id}_${question.id}`]}
-                                </p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 flex gap-2">
-                    <Button
-                      onClick={handleSubmit}
-                      className="flex-1"
-                    >
-                      <CheckCircle className="w-5 h-5" />
-                      <span>إرسال التقرير</span>
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => setShowPreview(false)}
-                      className="flex-1"
-                    >
-                      <span>تعديل</span>
-                    </Button>
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-3 p-3 bg-red-50 text-red-600 rounded-lg flex items-center gap-2 text-right flex-shrink-0 shadow-sm"
-              >
-                <AlertCircle className="w-5 h-5" />
-                <span>{error}</span>
-              </motion.div>
-            )}
-          </motion.div>
-        </motion.div>
-      )}
-      
-      {(loading && !pdfGenerating) && <LoadingSpinner />}
-      
-      {pdfGenerating && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex flex-col items-center justify-center"
-        >
-          <motion.div
-            animate={{ 
-              rotate: 360 
-            }}
-            transition={{ 
-              duration: 2,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-            className="w-16 h-16 mb-4"
-          >
-            <FileText className="w-full h-full text-white" />
-          </motion.div>
-          <p className="text-white text-lg font-bold">جاري إنشاء التقرير...</p>
-        </motion.div>
-      )}
-      
-      {/* Hidden div for PDF generation */}
-      <div className="hidden">
-        <div ref={reportRef} className="p-8 bg-white" dir="rtl">
-          {/* PDF content will be rendered here */}
-        </div>
-      </div>
-    </AnimatePresence>
-  );
-};
+                              }`
