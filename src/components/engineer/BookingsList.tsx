@@ -5,7 +5,7 @@ import { useOutletContext } from 'react-router-dom';
 import { Button } from '../ui/Button'; 
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { Calendar, Clock, Package, Building, MapPin, CheckCircle, XCircle, AlertCircle, RefreshCw, ListChecks, ClipboardList, FileText } from 'lucide-react';
-import { InspectionForm } from './InspectionForm';
+import { InspectionFormSelector } from './InspectionFormSelector';
 
 interface EngineerLayoutContext {
   setShowInspectionForm: (show: boolean) => void;
@@ -476,7 +476,7 @@ export const BookingsList = () => {
 
       <AnimatePresence>
         {showInspectionForm && (
-          <InspectionForm 
+          <InspectionFormSelector 
             bookingId={showInspectionForm}
             onComplete={() => {
               setShowInspectionForm(null);
