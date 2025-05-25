@@ -75,18 +75,44 @@ export const BookingsList = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
+      setError(null);
 
-      // Get the current user's engineer ID
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      // Get the current user's session
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError) {
+        throw new Error('حدث خطأ في التحقق من الهوية');
+      }
+      
+      if (!user) {
+        setError('يرجى تسجيل الدخول للوصول إلى هذه الصفحة');
+        setLoading(false);
+        return;
+      }
 
-      const { data: engineerData } = await supabase
+      // Get the engineer data
+      const { data: engineerData, error: engineerError } = await supabase
         .from('engineers')
         .select('id')
         .eq('user_id', user.id)
         .single();
 
-      if (!engineerData) throw new Error('Engineer not found');
+      if (engineerError) {
+        if (engineerError.code === 'PGRST116') {
+          setError('لم يتم العثور على حساب مهندس مرتبط بهذا المستخدم');
+        } else {
+          throw engineerError;
+        }
+        setLoading(false);
+        return;
+      }
+
+      if (!engineerData) {
+        setError('لم يتم العثور على حساب مهندس مرتبط بهذا المستخدم');
+        setLoading(false);
+        return;
+      }
+
       setEngineerId(engineerData.id);
 
       // Fetch bookings:
@@ -125,8 +151,8 @@ export const BookingsList = () => {
 
       setRejectionReasons(reasonsData || []);
     } catch (error) {
-      setError('حدث خطأ في تحميل البيانات');
       console.error('Error fetching data:', error);
+      setError(error instanceof Error ? error.message : 'حدث خطأ في تحميل البيانات');
     } finally {
       setLoading(false);
     }
