@@ -365,7 +365,7 @@ const inspectionSections: InspectionSection[] = [
   }
 ];
 
-export default function InspectionForm({ bookingId, onComplete = () => {} }: InspectionFormProps) {
+export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionFormProps) => { // Added default value
   const { user } = useAuthStore();
   const { data: engineer } = useEngineer(user?.id);
   const [currentStep, setCurrentStep] = useState(0);
@@ -760,7 +760,6 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
                           </div>
                         )}
                         
-                        
                         {question.type === 'select' && (
                           <select
                             value={answers[currentSection.id]?.[question.id] || ''}
@@ -1005,6 +1004,4 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
       </div>
     </AnimatePresence>
   );
-}
-
-export { InspectionForm }
+};
