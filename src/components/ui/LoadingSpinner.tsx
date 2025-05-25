@@ -8,9 +8,9 @@ interface LoadingSpinnerProps {
 export const LoadingSpinner = ({ className = "", fullScreen = true }: LoadingSpinnerProps) => {
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-[100]">
+      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-[200]">
         <motion.div
-          className={`w-16 h-16 border-4 border-emerald-500 rounded-full border-t-transparent ${className}`}
+          className={`w-16 h-16 border-6 border-emerald-500 rounded-full border-t-transparent ${className}`}
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
         />

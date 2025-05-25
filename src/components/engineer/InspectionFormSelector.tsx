@@ -67,7 +67,7 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center overflow-auto"
       >
         <div className="bg-white rounded-2xl p-8 max-w-md w-[95%] text-center">
           <motion.div
@@ -86,11 +86,11 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center overflow-auto"
         onClick={onComplete}
       >
         <div 
-          className="bg-white rounded-2xl p-8 max-w-md w-[95%] text-center m-4"
+          className="bg-white rounded-2xl p-8 max-w-md w-[95%] text-center m-4 max-h-[80vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="text-red-500 text-xl mb-4">
@@ -123,4 +123,17 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
   }
 
   return <AllPropertyTypesForm bookingId={bookingId} onComplete={onComplete} />;
+  
+  // Helper function to clear Supabase cache
+  function clearSupabaseCache() {
+    if (window.queryClient) {
+      window.queryClient.invalidateQueries();
+    }
+    
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('sb-') && key.includes('cache')) {
+        localStorage.removeItem(key);
+      }
+    });
+  }
 }
