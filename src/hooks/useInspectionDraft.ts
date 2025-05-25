@@ -27,6 +27,8 @@ export const useInspectionDraft = (bookingId: string, engineerId: string) => {
           booking_id: bookingId,
           engineer_id: engineerId,
           data
+        }, {
+          onConflict: 'booking_id,engineer_id'
         });
 
       if (error) throw error;
