@@ -9,5 +9,18 @@ interface InspectionFormSelectorProps {
 }
 
 export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: InspectionFormSelectorProps) => {
+  // Force scroll to top when the form opens
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    
+    // Prevent body scrolling when form is open
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      // Re-enable body scrolling when form closes
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
   return <InspectionForm bookingId={bookingId} onComplete={onComplete} />;
 }

@@ -601,14 +601,15 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-0 sm:p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center p-0 sm:p-4 overflow-y-auto"
+          onClick={() => !loading && onComplete?.()}
         >
           <BackButton />
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="bg-white rounded-2xl sm:rounded-3xl shadow-xl w-full h-screen sm:h-auto sm:w-[95%] sm:max-w-3xl sm:max-h-[90vh] flex flex-col p-4 sm:p-6 my-0 sm:my-4 overflow-hidden"
+            className="bg-white rounded-2xl sm:rounded-3xl shadow-xl w-full min-h-screen sm:min-h-0 sm:w-[95%] sm:max-w-3xl sm:max-h-[90vh] flex flex-col p-4 sm:p-6 my-0 sm:my-4"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
@@ -695,7 +696,7 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="space-y-4 sm:space-y-6 overflow-y-auto flex-grow px-1 pb-4 max-h-[calc(100vh-20rem)] sm:max-h-[calc(90vh-16rem)]"
+                    className="space-y-4 sm:space-y-6 overflow-y-auto flex-grow px-1 pb-4"
                   >
                     {currentSection.questions.map((question) => (
                       <motion.div
@@ -773,74 +774,4 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
                           </div>
                         )}
 
-                        {question.requiresNote && answers[currentSection.id]?.[question.id] === false && (
-                          <div className="mt-4">
-                            <textarea
-                              value={notes[`${currentSection.id}_${question.id}`] || ''}
-                              onChange={(e) => handleNote(currentSection.id, question.id, e.target.value)}
-                              placeholder="أضف ملاحظاتك هنا..."
-                              className="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:outline-none resize-none h-24"
-                            />
-                          </div>
-                        )}
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </AnimatePresence>
-
-                {/* Error Message */}
-                {error && (
-                  <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 flex items-center gap-2">
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    <p>{error}</p>
-                  </div>
-                )}
-
-                {/* Navigation Buttons */}
-                <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100 flex-shrink-0">
-                  <Button
-                    variant="outline"
-                    onClick={handlePrevious}
-                    disabled={currentStep === 0}
-                    className="flex items-center gap-1"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                    السابق
-                  </Button>
-
-                  {currentStep === inspectionSections.length - 1 ? (
-                    <Button
-                      onClick={handleSubmit}
-                      disabled={loading}
-                      className="flex items-center gap-2"
-                    >
-                      {loading ? (
-                        <>
-                          <LoadingSpinner />
-                          جاري الحفظ...
-                        </>
-                      ) : (
-                        <>
-                          <FileText className="w-4 h-4" />
-                          حفظ التقرير
-                        </>
-                      )}
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleNext}
-                      className="flex items-center gap-1"
-                    >
-                      التالي
-                      <ChevronLeft className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
+                        {question.requiresNote && answers[current
