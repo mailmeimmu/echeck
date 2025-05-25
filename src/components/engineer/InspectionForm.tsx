@@ -463,25 +463,6 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
   const currentSection = inspectionSections[currentStep];
 
   const handleNext = () => {
-    // Validate current section
-    for (const question of currentSection.questions) {
-      const answer = answers[currentSection.id]?.[question.id];
-      if (answer === undefined) {
-        setError(`الرجاء الإجابة على السؤال: ${question.text}`);
-        return;
-      }
-      
-      if (question.requiresPhoto && (!photos[`${currentSection.id}_${question.id}`] || photos[`${currentSection.id}_${question.id}`].length === 0)) {
-        setError(`الرجاء إرفاق صورة للسؤال: ${question.text}`);
-        return;
-      }
-
-      if (question.requiresNote && answer === false && !notes[`${currentSection.id}_${question.id}`]) {
-        setError(`الرجاء إضافة ملاحظة للسؤال: ${question.text}`);
-        return;
-      }
-    }
-
     setError(null);
     if (currentStep < inspectionSections.length - 1) {
       setCurrentStep(prev => prev + 1);
@@ -582,26 +563,7 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
-
     try {
-      // Validate all required fields
-      for (const section of inspectionSections) {
-        for (const question of section.questions) {
-          const answer = answers[section.id]?.[question.id];
-          if (answer === undefined) {
-            throw new Error(`الرجاء الإجابة على السؤال: ${question.text} في قسم ${section.title}`);
-          }
-          
-          if (question.requiresPhoto && (!photos[`${section.id}_${question.id}`] || photos[`${section.id}_${question.id}`].length === 0)) {
-            throw new Error(`يرجى رفع صور توثيقية لـ ${question.text}`);
-          }
-          
-          if (question.requiresNote && answer === false && !notes[`${section.id}_${question.id}`]) {
-            throw new Error(`الرجاء إضافة ملاحظة للسؤال: ${question.text}`);
-          }
-        }
-      }
-
       // Submit inspection data
       const { data: inspection } = await supabase.rpc('submit_inspection', {
         p_booking_id: bookingId,
