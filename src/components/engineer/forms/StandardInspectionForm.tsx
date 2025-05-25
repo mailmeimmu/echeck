@@ -652,11 +652,11 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
   
   // Scroll to top when form opens
   useEffect(() => {
-    // Force scroll to top when the form opens
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    
     // Prevent body scrolling when form is open
     document.body.style.overflow = 'hidden';
+    
+    // Force scroll to top when the form opens
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     
     return () => {
       // Re-enable body scrolling when form closes
@@ -865,8 +865,8 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
   };
 
   return (
-    <div className="fixed inset-0 bg-white z-50 flex flex-col">
-      <div className="max-w-4xl mx-auto p-4 w-full flex-1 overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-white z-[100] flex flex-col overflow-hidden">
+      <div className="max-w-4xl mx-auto p-4 w-full flex-1 flex flex-col h-full">
         <div className="flex justify-between items-center mb-6">
           <BackButton onClick={() => window.history.back()} />
           <h1 className="text-2xl font-bold text-center flex-1">نموذج فحص العقار</h1>
@@ -874,7 +874,7 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
         </div>
 
         {showModal && (
-          <div className="bg-white p-6 rounded-lg shadow-lg mb-6 max-h-[80vh] overflow-y-auto">
+          <div className="bg-white p-6 rounded-lg shadow-lg mb-6 overflow-y-auto flex-1">
             <h2 className="text-xl font-semibold mb-4">تفاصيل الطلب</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
@@ -953,8 +953,8 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
         )}
 
         {!showModal && (
-          <div className="flex flex-col flex-1 overflow-hidden">
-            <div className="bg-white rounded-lg shadow-lg p-6 mb-6 flex-1 overflow-y-auto">
+          <div className="flex flex-col flex-1 overflow-hidden h-full">
+            <div className="bg-white rounded-lg shadow-lg p-6 mb-2 flex-1 overflow-y-auto">
               <h2 className="text-xl font-semibold mb-4">{currentSection.title}</h2>
               
               {currentSection.questions.map((question) => {
@@ -1087,7 +1087,7 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
               </div>
             </div>
             
-            <div className="sticky bottom-0 left-0 right-0 bg-white pt-2 pb-4 px-4 flex gap-2 z-10 border-t border-gray-100">
+            <div className="sticky bottom-0 left-0 right-0 bg-white pt-2 pb-4 px-4 flex gap-2 z-10 border-t border-gray-100 mt-auto">
               {isSaving ? (
                 <div className="bg-gray-200 text-gray-600 px-4 py-2 rounded flex items-center">
                   <LoadingSpinner className="w-4 h-4 mr-2" />
