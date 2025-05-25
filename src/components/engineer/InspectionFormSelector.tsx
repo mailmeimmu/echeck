@@ -96,7 +96,7 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
             className="p-4 bg-emerald-50 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-emerald-100 transition-colors"
           >
             <Building className="w-10 h-10 text-emerald-600" />
-            <span className="font-medium">عمارة</span>
+            <span className="font-medium">مبنى</span>
           </motion.button>
           
           <motion.button
