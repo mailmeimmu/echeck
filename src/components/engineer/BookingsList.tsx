@@ -468,7 +468,6 @@ export const BookingsList = () => {
                       {booking.status === 'in_progress' && booking.engineer_id === engineerId && (
                         <Button
                           onClick={() => {
-                            window.scrollTo(0, 0);
                             setShowInspectionForm(booking.id);
                           }}
                           className="w-full"
