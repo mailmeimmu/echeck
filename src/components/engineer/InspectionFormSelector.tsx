@@ -67,7 +67,7 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center overflow-auto"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center overflow-y-auto"
       >
         <div className="bg-white rounded-2xl p-8 max-w-md w-[95%] text-center">
           <motion.div
@@ -86,11 +86,11 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center overflow-auto"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center overflow-y-auto"
         onClick={onComplete}
       >
         <div 
-          className="bg-white rounded-2xl p-8 max-w-md w-[95%] text-center m-4 max-h-[90vh] overflow-y-auto"
+          className="bg-white rounded-2xl p-8 max-w-md w-[95%] text-center my-8 mx-auto max-h-[90vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="text-red-500 text-xl mb-4">

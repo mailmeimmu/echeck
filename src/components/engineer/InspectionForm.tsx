@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, X, CheckCircle, Save, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '../ui/Button'; 
+import { Button } from '../ui/Button';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { BackButton } from '../ui/BackButton'; 
+import { BackButton } from '../ui/BackButton';
 import { useInspectionDraft } from '../../hooks/useInspectionDraft';
 import { useEngineer } from '../../hooks/useEngineer';
 import { useAuthStore } from '../../store/authStore';
@@ -595,25 +595,22 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
   return (
     <AnimatePresence>
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+        <motion.div
+          key="inspection-form-modal"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center"
+          onClick={() => !loading && onComplete?.()}
+        >
+          <BackButton />
           <motion.div
-            key="inspection-form-modal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
-            onClick={() => !loading && onComplete?.()}
-          />
-          
-          <div className="fixed inset-0 z-[101] flex items-center justify-center p-0 sm:p-4 overflow-hidden">
-            <BackButton />
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="bg-white rounded-2xl sm:rounded-3xl shadow-xl w-full h-full sm:h-auto sm:w-[95%] sm:max-w-3xl sm:max-h-[90vh] flex flex-col p-4 sm:p-6 overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="bg-white rounded-none sm:rounded-3xl shadow-xl w-full h-full sm:h-auto sm:w-[95%] sm:max-w-3xl sm:max-h-[90vh] flex flex-col p-4 sm:p-6 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Close button */}
             <div className="flex justify-between items-center mb-3 sm:mb-5 flex-shrink-0 sticky top-0 bg-white z-10 pb-2 border-b border-gray-100 pt-2">
               <h2 className="text-xl sm:text-2xl font-bold">تقرير الفحص</h2>
@@ -668,7 +665,7 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
                 </Button>
               </motion.div>
             ) : (
-              <div className="flex flex-col flex-1 overflow-hidden">
+              <div className="flex flex-col flex-1 overflow-hidden h-full">
                 {/* Progress Bar */}
                 <div className="bg-gray-100 h-2 rounded-full overflow-hidden flex-shrink-0 mb-2 mt-1">
                   <motion.div
@@ -692,7 +689,7 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
                 </motion.div>
 
                 {/* Questions */}
-                <div className="flex-1 overflow-y-auto px-1 pb-2">
+                <div className="flex-1 overflow-y-auto px-1 pb-2 h-full">
                   <AnimatePresence mode="wait" initial={false}>
                   <motion.div
                     key={`section-${currentSection.id}`}
@@ -838,8 +835,7 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
               </div>
               )}
             </motion.div>
-          </div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
