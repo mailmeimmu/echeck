@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { useInspectionDraft } from '../../hooks/useInspectionDraft'; 
+import { useInspectionDraft } from '../../hooks/useInspectionDraft'; 
 import { useAuthStore } from '../../store/authStore';
+import { Button } from '../ui/Button';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { AlertCircle, CheckCircle, ArrowRight } from 'lucide-react';
 
 interface InspectionFormProps {
   bookingId: string;
@@ -74,176 +78,252 @@ export const InspectionForm = ({ bookingId, onComplete }: InspectionFormProps) =
   const conditions = ['excellent', 'good', 'fair', 'poor'];
 
   return (
-    <motion.form
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      onSubmit={handleSubmit}
-      className="space-y-6 bg-white p-6 rounded-xl shadow-lg"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onComplete}
     >
-      <div className="space-y-4">
-        <div>
-          <label htmlFor="property_age" className="block text-sm font-medium text-gray-700">
-            Property Age (years)
-          </label>
-          <input
-            type="number"
-            id="property_age"
-            name="property_age"
-            value={formData.property_age}
-            onChange={handleChange}
-            required
-            min="0"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">تقرير الفحص</h2>
+          <Button onClick={onComplete} variant="outline">
+            <ArrowRight className="w-5 h-5" />
+            <span>رجوع</span>
+          </Button>
         </div>
 
-        <div>
-          <label htmlFor="total_area" className="block text-sm font-medium text-gray-700">
-            Total Area (sq meters)
-          </label>
-          <input
-            type="number"
-            id="total_area"
-            name="total_area"
-            value={formData.total_area}
-            onChange={handleChange}
-            required
-            min="0"
-            step="0.01"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <label htmlFor="property_age" className="block text-sm font-medium text-gray-700">
+                عمر العقار (بالسنوات)
+              </label>
+              <input
+                type="number"
+                id="property_age"
+                name="property_age"
+                value={formData.property_age}
+                onChange={handleChange}
+                required
+                min="0"
+                className="input-field"
+              />
+            </div>
 
-        <div>
-          <label htmlFor="floor_count" className="block text-sm font-medium text-gray-700">
-            Number of Floors
-          </label>
-          <input
-            type="number"
-            id="floor_count"
-            name="floor_count"
-            value={formData.floor_count}
-            onChange={handleChange}
-            required
-            min="1"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
+            <div>
+              <label htmlFor="total_area" className="block text-sm font-medium text-gray-700">
+                المساحة الكلية (متر مربع)
+              </label>
+              <input
+                type="number"
+                id="total_area"
+                name="total_area"
+                value={formData.total_area}
+                onChange={handleChange}
+                required
+                min="0"
+                step="0.01"
+                className="input-field"
+              />
+            </div>
 
-        <div>
-          <label htmlFor="foundation_type" className="block text-sm font-medium text-gray-700">
-            Foundation Type
-          </label>
-          <input
-            type="text"
-            id="foundation_type"
-            name="foundation_type"
-            value={formData.foundation_type}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
+            <div>
+              <label htmlFor="floor_count" className="block text-sm font-medium text-gray-700">
+                عدد الطوابق
+              </label>
+              <input
+                type="number"
+                id="floor_count"
+                name="floor_count"
+                value={formData.floor_count}
+                onChange={handleChange}
+                required
+                min="1"
+                className="input-field"
+              />
+            </div>
 
-        <div>
-          <label htmlFor="foundation_condition" className="block text-sm font-medium text-gray-700">
-            Foundation Condition
-          </label>
-          <select
-            id="foundation_condition"
-            name="foundation_condition"
-            value={formData.foundation_condition}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          >
-            {conditions.map(condition => (
-              <option key={condition} value={condition}>
-                {condition.charAt(0).toUpperCase() + condition.slice(1)}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="wall_condition" className="block text-sm font-medium text-gray-700">
-            Wall Condition
-          </label>
-          <select
-            id="wall_condition"
-            name="wall_condition"
-            value={formData.wall_condition}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          >
-            {conditions.map(condition => (
-              <option key={condition} value={condition}>
-                {condition.charAt(0).toUpperCase() + condition.slice(1)}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="roof_condition" className="block text-sm font-medium text-gray-700">
-            Roof Condition
-          </label>
-          <select
-            id="roof_condition"
-            name="roof_condition"
-            value={formData.roof_condition}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          >
-            {conditions.map(condition => (
-              <option key={condition} value={condition}>
-                {condition.charAt(0).toUpperCase() + condition.slice(1)}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="property_safe"
-            name="property_safe"
-            checked={formData.property_safe}
-            onChange={handleChange}
-            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <label htmlFor="property_safe" className="ml-2 block text-sm text-gray-700">
-            Property is safe for occupancy
-          </label>
-        </div>
-
-        <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
-            Additional Notes
-          </label>
-          <textarea
-            id="notes"
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            rows={4}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
-      </div>
-
-      {error && (
-        <div className="rounded-md bg-red-50 p-4">
-          <div className="flex">
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">Error</h3>
-              <div className="mt-2 text-sm text-red-700">{error}</div>
+            <div>
+              <label htmlFor="foundation_type" className="block text-sm font-medium text-gray-700">
+                نوع الأساسات
+              </label>
+              <input
+                type="text"
+                id="foundation_type"
+                name="foundation_type"
+                value={formData.foundation_type}
+                onChange={handleChange}
+                required
+                className="input-field"
+              />
             </div>
           </div>
-        </div>
-      )}
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">حالة العناصر الإنشائية</h3>
+            
+            <div className="grid gap-4 md:grid-cols-3">
+              <div>
+                <label htmlFor="foundation_condition" className="block text-sm font-medium text-gray-700">
+                  حالة الأساسات
+                </label>
+                <select
+                  id="foundation_condition"
+                  name="foundation_condition"
+                  value={formData.foundation_condition}
+                  onChange={handleChange}
+                  required
+                  className="input-field"
+                >
+                  {conditions.map(condition => (
+                    <option key={condition} value={condition}>
+                      {condition === 'excellent' ? 'ممتاز' : 
+                       condition === 'good' ? 'جيد' : 
+                       condition === 'fair' ? 'متوسط' : 'ضعيف'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="wall_condition" className="block text-sm font-medium text-gray-700">
+                  حالة الجدران
+                </label>
+                <select
+                  id="wall_condition"
+                  name="wall_condition"
+                  value={formData.wall_condition}
+                  onChange={handleChange}
+                  required
+                  className="input-field"
+                >
+                  {conditions.map(condition => (
+                    <option key={condition} value={condition}>
+                      {condition === 'excellent' ? 'ممتاز' : 
+                       condition === 'good' ? 'جيد' : 
+                       condition === 'fair' ? 'متوسط' : 'ضعيف'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="roof_condition" className="block text-sm font-medium text-gray-700">
+                  حالة السقف
+                </label>
+                <select
+                  id="roof_condition"
+                  name="roof_condition"
+                  value={formData.roof_condition}
+                  onChange={handleChange}
+                  required
+                  className="input-field"
+                >
+                  {conditions.map(condition => (
+                    <option key={condition} value={condition}>
+                      {condition === 'excellent' ? 'ممتاز' : 
+                       condition === 'good' ? 'جيد' : 
+                       condition === 'fair' ? 'متوسط' : 'ضعيف'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 bg-gray-50 rounded-xl">
+            <div className="flex items-center gap-3 mb-2">
+              <input
+                type="checkbox"
+                id="property_safe"
+                name="property_safe"
+                checked={formData.property_safe}
+                onChange={handleChange}
+                className="h-5 w-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+              />
+              <label htmlFor="property_safe" className="text-lg font-medium">
+                العقار آمن للسكن
+              </label>
+            </div>
+            <p className="text-sm text-gray-500">
+              يرجى التأكد من تقييم جميع جوانب السلامة قبل تحديد هذا الخيار
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+              ملاحظات إضافية
+            </label>
+            <textarea
+              id="notes"
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              rows={4}
+              className="input-field"
+              placeholder="أي ملاحظات أو توصيات إضافية..."
+            />
+          </div>
+
+          {error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-3 rounded-lg bg-red-50 text-red-600 flex items-center gap-2"
+            >
+              <AlertCircle className="w-5 h-5" />
+              <span>{error}</span>
+            </motion.div>
+          )}
+
+          <div className="flex gap-3 justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onComplete}
+            >
+              إلغاء
+            </Button>
+            
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <LoadingSpinner className="w-5 h-5" />
+                  <span>جاري الحفظ...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-5 h-5" />
+                  <span>حفظ التقرير</span>
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+
+        {isSaving && (
+          <div className="fixed bottom-4 left-4 bg-emerald-50 text-emerald-600 px-3 py-2 rounded-lg text-sm flex items-center gap-2">
+            <LoadingSpinner className="w-4 h-4" />
+            <span>جاري حفظ المسودة...</span>
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+};
+
 
       <div className="flex justify-end">
         <button
