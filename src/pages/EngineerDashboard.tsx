@@ -1,10 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookingsList } from '../components/engineer/BookingsList';
+import { BookingsList } from '../components/engineer/BookingsList'; 
 import { useOutletContext } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useEngineer } from '../hooks/useEngineer';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { useState } from 'react';
 
 interface EngineerLayoutContext {
   setShowInspectionForm: (show: boolean) => void;
@@ -14,7 +13,6 @@ export const EngineerDashboard = () => {
   const { user } = useAuthStore();
   const { setShowInspectionForm } = useOutletContext<EngineerLayoutContext>();
   const { data: engineer, isLoading, error } = useEngineer(user?.id);
-  const [showBookings, setShowBookings] = useState(true);
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -45,7 +43,7 @@ export const EngineerDashboard = () => {
         <p className="text-gray-600">إدارة طلبات الفحص والمعاينة</p>
       </motion.div>
 
-      {showBookings && <BookingsList />}
+      <BookingsList />
     </div>
   );
 };

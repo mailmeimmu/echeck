@@ -1,20 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 
-interface DraftData {
-  answers: Record<string, any>;
-  photos: Record<string, string[]>;
-  notes: Record<string, string>;
-}
-
 export const useInspectionDraft = (bookingId: string, engineerId: string) => {
   const queryClient = useQueryClient();
 
   const draftQuery = useQuery({
     queryKey: ['inspectionDraft', bookingId],
     queryFn: async () => {
-      if (!bookingId || !engineerId) return null;
-
       const { data, error } = await supabase
         .from('inspection_drafts')
         .select('*')
@@ -25,13 +17,10 @@ export const useInspectionDraft = (bookingId: string, engineerId: string) => {
       if (error && error.code !== 'PGRST116') throw error;
       return data;
     },
-    enabled: !!bookingId && !!engineerId,
   });
 
   const saveDraft = useMutation({
-    mutationFn: async (data: DraftData) => {
-      if (!bookingId || !engineerId) return;
-
+    mutationFn: async (data: any) => {
       const { error } = await supabase
         .from('inspection_drafts')
         .upsert({
@@ -49,8 +38,6 @@ export const useInspectionDraft = (bookingId: string, engineerId: string) => {
 
   const deleteDraft = useMutation({
     mutationFn: async () => {
-      if (!bookingId || !engineerId) return;
-
       const { error } = await supabase
         .from('inspection_drafts')
         .delete()
@@ -67,8 +54,6 @@ export const useInspectionDraft = (bookingId: string, engineerId: string) => {
   return {
     draft: draftQuery.data,
     isLoading: draftQuery.isLoading,
-    isError: draftQuery.isError,
-    error: draftQuery.error,
     saveDraft: saveDraft.mutate,
     isSaving: saveDraft.isPending,
     deleteDraft: deleteDraft.mutate,
