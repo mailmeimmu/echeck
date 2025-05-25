@@ -1005,3 +1005,5 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
     </AnimatePresence>
   );
 }
+
+export { InspectionForm }
