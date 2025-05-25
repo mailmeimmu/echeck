@@ -13,8 +13,6 @@ export const AllPropertyTypesForm = (props: InspectionFormProps) => {
 
   // Force scroll to top when the form opens
   useEffect(() => {
-    window.scrollTo(0, 0);
-    
     // Prevent body scrolling when form is open
     document.body.style.overflow = 'hidden';
     
@@ -37,7 +35,7 @@ export const AllPropertyTypesForm = (props: InspectionFormProps) => {
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
       >
         <h2 className="text-2xl font-bold mb-6 text-center">اختر نوع العقار</h2>
         
