@@ -380,13 +380,10 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
   const [showPreview, setShowPreview] = useState(false);
   const reportRef = React.useRef<HTMLDivElement>(null);
   
-  // Scroll to top when form opens
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
-
   const {
     draft,
+    isLoading: isDraftLoading,
+    isError: isDraftError,
     saveDraft,
     isSaving,
     deleteDraft
@@ -394,17 +391,17 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
 
   // Load draft data on mount
   useEffect(() => {
-    if (draft?.data) {
+    if (!isDraftLoading && draft?.data) {
       setAnswers(draft.data.answers || {});
       setPhotos(draft.data.photos || {});
       setNotes(draft.data.notes || {});
     }
-  }, [draft]);
+  }, [draft, isDraftLoading]);
 
   // Auto-save when form data changes
   useEffect(() => {
     const debouncedSave = setTimeout(() => {
-      if (Object.keys(answers).length > 0) {
+      if (Object.keys(answers).length > 0 && !isSaving) {
         saveDraft({
           answers,
           photos,
@@ -414,10 +411,13 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
     }, 1000);
 
     return () => clearTimeout(debouncedSave);
-  }, [answers, photos, notes, saveDraft]);
+  }, [answers, photos, notes, saveDraft, isSaving]);
 
   // Notify parent components when the form opens or closes
   useEffect(() => {
+    // Scroll to top when form opens
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
     // Dispatch custom event when form opens
     window.dispatchEvent(new CustomEvent('inspection-form-open'));
     
@@ -633,6 +633,13 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center p-0 sm:p-4 overflow-y-auto"
         >
           <BackButton />
+          {isDraftLoading ? (
+            <LoadingSpinner />
+          ) : isDraftError ? (
+            <div className="bg-red-50 text-red-600 p-4 rounded-lg">
+              حدث خطأ في تحميل المسودة
+            </div>
+          ) : (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
