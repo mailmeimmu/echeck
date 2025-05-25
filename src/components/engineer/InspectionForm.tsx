@@ -774,4 +774,68 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
                           </div>
                         )}
 
-                        {question.requiresNote && answers[current
+                        {question.requiresNote && (
+                          <div className="mt-4">
+                            <textarea
+                              value={notes[`${currentSection.id}_${question.id}`] || ''}
+                              onChange={(e) => handleNote(currentSection.id, question.id, e.target.value)}
+                              placeholder="أضف ملاحظاتك هنا..."
+                              className="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-emerald-500 focus:outline-none resize-none h-24"
+                            />
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* Navigation Buttons */}
+                <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    onClick={handlePrevious}
+                    disabled={currentStep === 0}
+                    className="flex items-center gap-2"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                    السابق
+                  </Button>
+
+                  {currentStep === inspectionSections.length - 1 ? (
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={loading}
+                      className="flex items-center gap-2"
+                    >
+                      {loading ? (
+                        <LoadingSpinner className="w-4 h-4" />
+                      ) : (
+                        <FileText className="w-4 h-4" />
+                      )}
+                      حفظ التقرير
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleNext}
+                      className="flex items-center gap-2"
+                    >
+                      التالي
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+
+                {error && (
+                  <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <p>{error}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
