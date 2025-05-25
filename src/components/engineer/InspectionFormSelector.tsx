@@ -16,8 +16,6 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
 
   // Force scroll to top when the form opens
   useEffect(() => {
-    window.scrollTo(0, 0);
-    
     // Prevent body scrolling when form is open
     document.body.style.overflow = 'hidden';
     
@@ -56,7 +54,7 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center overflow-y-auto"
       >
         <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center">
           <motion.div

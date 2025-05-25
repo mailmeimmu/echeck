@@ -81,9 +81,6 @@ export const BaseInspectionForm = ({
   
   // Scroll to top when form opens
   useEffect(() => {
-    // Force scroll to top when the form opens
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    
     // Prevent body scrolling when form is open
     document.body.style.overflow = 'hidden';
     
@@ -751,3 +748,6 @@ export const BaseInspectionForm = ({
                   (question.requiresPhoto === undefined && 
                    (answers[currentSection.id]?.[question.id] === true || 
                     answers[currentSection.id]?.[question.id] === false))) && (
+                  <div className="mt-2">
+                    <PhotoUploader
+                      questionId={`${currentSection.id}_${question
