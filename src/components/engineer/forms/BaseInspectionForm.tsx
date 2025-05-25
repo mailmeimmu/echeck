@@ -30,32 +30,32 @@ Here's the fixed version with all missing closing brackets added:
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm overflow-y-auto"
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-2xl shadow-xl w-full max-w-3xl my-8 relative"
+            className="bg-white rounded-2xl shadow-xl w-full max-w-3xl my-4 mx-4 relative"
           >
-            <div className="sticky top-0 z-10 bg-white border-b p-4 sm:p-6 flex items-center justify-between">
+            <div className="sticky top-0 z-10 bg-white border-b border-gray-100 p-4 sm:p-6 flex items-center justify-between rounded-t-2xl">
               <BackButton onClick={handlePrevious} disabled={!selectedPropertyType} />
               <h2 className="text-xl font-bold text-center flex-1">
                 {currentSection ? currentSection.title : 'نموذج الفحص'}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <X size={24} />
               </button>
             </div>
 
-            <div className="p-4 sm:p-6 max-h-[calc(100vh-16rem)] overflow-y-auto">
+            <div className="p-4 sm:p-6 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 16rem)' }}>
               {renderContent()}
             </div>
 
-            <div className="sticky bottom-0 z-10 bg-white border-t p-4 sm:p-6">
+            <div className="sticky bottom-0 z-10 bg-white border-t border-gray-100 p-4 sm:p-6 rounded-b-2xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
               {error && (
                 <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg flex items-center gap-2">
                   <AlertCircle size={20} />

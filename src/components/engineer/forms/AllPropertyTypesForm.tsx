@@ -30,12 +30,12 @@ export const AllPropertyTypesForm = (props: InspectionFormProps) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center overflow-y-auto"
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 m-4 relative"
       >
         <h2 className="text-2xl font-bold mb-6 text-center">اختر نوع العقار</h2>
         
