@@ -795,4 +795,314 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
       // Add order details
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'normal');
-      pdf.text(`اسم العميل: ${orderDetails.clientName
+      pdf.text(`اسم العميل: ${orderDetails.clientName}`, 20, 40);
+      pdf.text(`رقم الطلب: ${orderDetails.orderNumber}`, 20, 50);
+      pdf.text(`تاريخ الطلب: ${orderDetails.orderDate}`, 20, 60);
+      pdf.text(`تاريخ التقرير: ${orderDetails.reportDate}`, 20, 70);
+      pdf.text(`وصف العقار: ${orderDetails.propertyDescription}`, 20, 80);
+      pdf.text(`الحي: ${orderDetails.neighborhood}`, 20, 90);
+      pdf.text(`موقع العقار: ${orderDetails.propertyLocation}`, 20, 100);
+      pdf.text(`مساحة العقار: ${orderDetails.propertyArea}`, 20, 110);
+      pdf.text(`الدور: ${orderDetails.floorLevel}`, 20, 120);
+      
+      // Add sections
+      let yOffset = 140;
+      
+      for (const section of allSections) {
+        // Add section title
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(16);
+        pdf.text(section.title, 105, yOffset, { align: 'center' });
+        yOffset += 10;
+        
+        // Add questions and answers
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(12);
+        
+        for (const question of section.questions) {
+          const answer = answers[section.id]?.[question.id];
+          let answerText = '';
+          
+          if (question.type === 'boolean') {
+            answerText = answer ? 'نعم' : 'لا';
+          } else if (question.type === 'select') {
+            const option = question.options?.find(opt => opt.value === answer);
+            answerText = option?.label || '';
+          } else if (question.type === 'rating') {
+            answerText = answer?.toString() || '';
+          }
+          
+          // Add question and answer
+          pdf.text(`${question.text}: ${answerText}`, 20, yOffset);
+          yOffset += 10;
+          
+          // Add note if exists
+          const note = notes[`${section.id}_${question.id}`];
+          if (note) {
+            pdf.text(`ملاحظة: ${note}`, 30, yOffset);
+            yOffset += 10;
+          }
+          
+          // Check if we need a new page
+          if (yOffset > 270) {
+            pdf.addPage();
+            yOffset = 20;
+          }
+        }
+        
+        yOffset += 10;
+      }
+      
+      // Save the PDF
+      pdf.save('تقرير-فحص-العقار.pdf');
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      setError('حدث خطأ أثناء إنشاء ملف PDF');
+    } finally {
+      setPdfGenerating(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
+      <div className="max-w-4xl mx-auto p-4">
+        <div className="flex justify-between items-center mb-6">
+          <BackButton onClick={() => window.history.back()} />
+          <h1 className="text-2xl font-bold text-center flex-1">نموذج فحص العقار</h1>
+          <div className="w-10" /> {/* Spacer for alignment */}
+        </div>
+
+        {showModal && (
+          <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
+            <h2 className="text-xl font-semibold mb-4">تفاصيل الطلب</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input
+                type="text"
+                placeholder="اسم العميل"
+                value={orderDetails.clientName}
+                onChange={(e) => handleOrderDetailChange('clientName', e.target.value)}
+                className="p-2 border rounded"
+              />
+              <input
+                type="text"
+                placeholder="رقم الطلب"
+                value={orderDetails.orderNumber}
+                onChange={(e) => handleOrderDetailChange('orderNumber', e.target.value)}
+                className="p-2 border rounded"
+              />
+              <input
+                type="date"
+                value={orderDetails.orderDate}
+                onChange={(e) => handleOrderDetailChange('orderDate', e.target.value)}
+                className="p-2 border rounded"
+              />
+              <input
+                type="date"
+                value={orderDetails.reportDate}
+                onChange={(e) => handleOrderDetailChange('reportDate', e.target.value)}
+                className="p-2 border rounded"
+              />
+              <input
+                type="text"
+                placeholder="وصف العقار"
+                value={orderDetails.propertyDescription}
+                onChange={(e) => handleOrderDetailChange('propertyDescription', e.target.value)}
+                className="p-2 border rounded"
+              />
+              <input
+                type="text"
+                placeholder="الحي"
+                value={orderDetails.neighborhood}
+                onChange={(e) => handleOrderDetailChange('neighborhood', e.target.value)}
+                className="p-2 border rounded"
+              />
+              <input
+                type="text"
+                placeholder="موقع العقار"
+                value={orderDetails.propertyLocation}
+                onChange={(e) => handleOrderDetailChange('propertyLocation', e.target.value)}
+                className="p-2 border rounded"
+              />
+              <input
+                type="text"
+                placeholder="مساحة العقار"
+                value={orderDetails.propertyArea}
+                onChange={(e) => handleOrderDetailChange('propertyArea', e.target.value)}
+                className="p-2 border rounded"
+              />
+              <select
+                value={orderDetails.floorLevel}
+                onChange={(e) => handleOrderDetailChange('floorLevel', e.target.value)}
+                className="p-2 border rounded"
+              >
+                <option value="الأرضي">الأرضي</option>
+                <option value="الأول">الأول</option>
+                <option value="الثاني">الثاني</option>
+                <option value="الثالث">الثالث</option>
+                <option value="الرابع">الرابع</option>
+              </select>
+            </div>
+            <button
+              onClick={() => setShowModal(false)}
+              className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              متابعة
+            </button>
+          </div>
+        )}
+
+        {!showModal && (
+          <>
+            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+              <h2 className="text-xl font-semibold mb-4">{currentSection.title}</h2>
+              
+              {currentSection.questions.map((question) => {
+                // Skip conditional questions that don't apply
+                if (question.conditional) {
+                  const dependsOnValue = answers[currentSection.id]?.[question.conditional.dependsOn];
+                  if (dependsOnValue !== question.conditional.value) {
+                    return null;
+                  }
+                }
+
+                return (
+                  <div key={question.id} className="mb-6">
+                    <label className="block text-lg mb-2">{question.text}</label>
+                    
+                    {question.type === 'boolean' && (
+                      <div className="flex gap-4">
+                        <button
+                          onClick={() => handleAnswer(currentSection.id, question.id, true)}
+                          className={`px-4 py-2 rounded ${
+                            answers[currentSection.id]?.[question.id] === true
+                              ? 'bg-green-500 text-white'
+                              : 'bg-gray-200'
+                          }`}
+                        >
+                          نعم
+                        </button>
+                        <button
+                          onClick={() => handleAnswer(currentSection.id, question.id, false)}
+                          className={`px-4 py-2 rounded ${
+                            answers[currentSection.id]?.[question.id] === false
+                              ? 'bg-red-500 text-white'
+                              : 'bg-gray-200'
+                          }`}
+                        >
+                          لا
+                        </button>
+                      </div>
+                    )}
+
+                    {question.type === 'select' && (
+                      <select
+                        value={answers[currentSection.id]?.[question.id] || ''}
+                        onChange={(e) => handleAnswer(currentSection.id, question.id, e.target.value)}
+                        className="w-full p-2 border rounded"
+                      >
+                        <option value="">اختر...</option>
+                        {question.options?.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+
+                    {question.type === 'rating' && (
+                      <select
+                        value={answers[currentSection.id]?.[question.id] || ''}
+                        onChange={(e) => handleAnswer(currentSection.id, question.id, parseInt(e.target.value))}
+                        className="w-full p-2 border rounded"
+                      >
+                        <option value="">اختر تقييم...</option>
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                          <option key={num} value={num}>
+                            {num}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+
+                    {question.requiresPhoto && (
+                      <div className="mt-4">
+                        <PhotoUploader
+                          onUpload={(url) => handlePhotoUpload(`${currentSection.id}_${question.id}`, url)}
+                          photos={photos[`${currentSection.id}_${question.id}`] || []}
+                        />
+                      </div>
+                    )}
+
+                    {question.requiresNote && answers[currentSection.id]?.[question.id] === false && (
+                      <div className="mt-4">
+                        <textarea
+                          placeholder="أضف ملاحظة..."
+                          value={notes[`${currentSection.id}_${question.id}`] || ''}
+                          onChange={(e) => handleNote(currentSection.id, question.id, e.target.value)}
+                          className="w-full p-2 border rounded"
+                          rows={3}
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                  {error}
+                </div>
+              )}
+
+              <div className="flex justify-between mt-6">
+                <button
+                  onClick={handlePrevious}
+                  disabled={currentSectionIndex === 0}
+                  className={`px-4 py-2 rounded ${
+                    currentSectionIndex === 0
+                      ? 'bg-gray-300 cursor-not-allowed'
+                      : 'bg-blue-500 text-white hover:bg-blue-600'
+                  }`}
+                >
+                  السابق
+                </button>
+                
+                {currentSectionIndex === allSections.length - 1 ? (
+                  <button
+                    onClick={generatePDF}
+                    disabled={pdfGenerating}
+                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                  >
+                    {pdfGenerating ? 'جاري إنشاء التقرير...' : 'إنشاء التقرير'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleNext}
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  >
+                    التالي
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="fixed bottom-4 left-4 flex gap-2">
+              {isSaving ? (
+                <div className="bg-gray-200 text-gray-600 px-4 py-2 rounded flex items-center">
+                  <LoadingSpinner className="w-4 h-4 mr-2" />
+                  جاري الحفظ...
+                </div>
+              ) : (
+                <div className="bg-green-100 text-green-600 px-4 py-2 rounded flex items-center">
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  تم الحفظ
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
