@@ -6,12 +6,12 @@ import { BackButton } from '../ui/BackButton';
 import { useInspectionDraft } from '../../hooks/useInspectionDraft';
 import { useEngineer } from '../../hooks/useEngineer';
 import { useAuthStore } from '../../store/authStore';
-import { supabase } from '../../lib/supabase';
 import { PhotoUploader } from './PhotoUploader';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import React, { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { supabase } from '../../lib/supabase';
 
 interface InspectionFormProps {
   bookingId: string;
@@ -365,7 +365,8 @@ const inspectionSections: InspectionSection[] = [
   }
 ];
 
-export default function InspectionForm({ bookingId, onComplete = () => {} }: InspectionFormProps) { // Changed to default export
+// Using a single default export instead of multiple exports
+export default function InspectionForm({ bookingId, onComplete = () => {} }: InspectionFormProps) {
   const { user } = useAuthStore();
   const { data: engineer } = useEngineer(user?.id);
   const [currentStep, setCurrentStep] = useState(0);
@@ -1005,5 +1006,3 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
     </AnimatePresence>
   );
 }
-
-export { InspectionForm }
