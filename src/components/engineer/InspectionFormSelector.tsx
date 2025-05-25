@@ -54,9 +54,9 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center overflow-y-auto"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       >
-        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center relative">
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center my-auto mx-4">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -73,9 +73,10 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        onClick={onComplete}
       >
-        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center">
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full text-center my-auto mx-4" onClick={(e) => e.stopPropagation()}>
           <div className="text-red-500 text-xl mb-4">⚠️</div>
           <p className="text-lg font-medium mb-4">{error}</p>
           <div className="flex gap-4 justify-center">
