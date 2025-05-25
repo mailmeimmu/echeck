@@ -1,14 +1,20 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Building, Home, Map, Warehouse, FileText, Building2 } from 'lucide-react';
-import InspectionForm from './InspectionForm';
+import { VillaInspectionForm } from './forms/VillaInspectionForm';
+import { ApartmentInspectionForm } from './forms/ApartmentInspectionForm';
+import { LandInspectionForm } from './forms/LandInspectionForm';
+import { BuildingInspectionForm } from './forms/BuildingInspectionForm';
+import { OfficeInspectionForm } from './forms/OfficeInspectionForm';
+import { StorageInspectionForm } from './forms/StorageInspectionForm';
+import { AllPropertyTypesForm } from './forms/AllPropertyTypesForm';
 
 interface InspectionFormSelectorProps {
   bookingId: string;
   onComplete?: () => void;
 }
 
-export const InspectionFormSelector = ({ bookingId, onComplete }: InspectionFormSelectorProps) => {
+export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: InspectionFormSelectorProps) => {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   
   // Scroll to top when form opens
@@ -18,7 +24,24 @@ export const InspectionFormSelector = ({ bookingId, onComplete }: InspectionForm
 
   // If a type is selected, render the appropriate form
   if (selectedType) {
-    return <InspectionForm bookingId={bookingId} onComplete={onComplete} />;
+    switch (selectedType) {
+      case 'villa':
+        return <VillaInspectionForm bookingId={bookingId} onComplete={onComplete} />;
+      case 'apartment':
+        return <ApartmentInspectionForm bookingId={bookingId} onComplete={onComplete} />;
+      case 'land':
+        return <LandInspectionForm bookingId={bookingId} onComplete={onComplete} />;
+      case 'building':
+        return <BuildingInspectionForm bookingId={bookingId} onComplete={onComplete} />;
+      case 'office':
+        return <OfficeInspectionForm bookingId={bookingId} onComplete={onComplete} />;
+      case 'storage':
+        return <StorageInspectionForm bookingId={bookingId} onComplete={onComplete} />;
+      case 'all':
+        return <AllPropertyTypesForm bookingId={bookingId} onComplete={onComplete} />;
+      default:
+        return <VillaInspectionForm bookingId={bookingId} onComplete={onComplete} />;
+    }
   }
 
   // Otherwise, show the type selector
