@@ -30,15 +30,15 @@ Here's the fixed version with all missing closing brackets added:
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden"
+            className="bg-white rounded-2xl shadow-xl w-full max-w-3xl my-8 relative"
           >
-            <div className="p-4 sm:p-6 border-b flex items-center justify-between">
+            <div className="sticky top-0 z-10 bg-white border-b p-4 sm:p-6 flex items-center justify-between">
               <BackButton onClick={handlePrevious} disabled={!selectedPropertyType} />
               <h2 className="text-xl font-bold text-center flex-1">
                 {currentSection ? currentSection.title : 'نموذج الفحص'}
@@ -51,11 +51,11 @@ Here's the fixed version with all missing closing brackets added:
               </button>
             </div>
 
-            <div className="p-4 sm:p-6">
+            <div className="p-4 sm:p-6 max-h-[calc(100vh-16rem)] overflow-y-auto">
               {renderContent()}
             </div>
 
-            <div className="p-4 sm:p-6 border-t">
+            <div className="sticky bottom-0 z-10 bg-white border-t p-4 sm:p-6">
               {error && (
                 <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg flex items-center gap-2">
                   <AlertCircle size={20} />
