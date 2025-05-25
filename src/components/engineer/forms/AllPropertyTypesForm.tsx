@@ -1,15 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Building, Home, Map, Warehouse, FileText, Building2 } from 'lucide-react';
-import { VillaInspectionForm } from './VillaInspectionForm';
-import { ApartmentInspectionForm } from './ApartmentInspectionForm';
-import { LandInspectionForm } from './LandInspectionForm';
-import { BuildingInspectionForm } from './BuildingInspectionForm';
-import { OfficeInspectionForm } from './OfficeInspectionForm';
-import { StorageInspectionForm } from './StorageInspectionForm';
-import { InspectionFormProps } from './StandardInspectionForm';
+import { StandardInspectionForm } from './StandardInspectionForm';
 
-export const AllPropertyTypesForm = (props: Omit<InspectionFormProps, 'propertyType'>) => {
+interface InspectionFormProps {
+  bookingId: string;
+  onComplete?: () => void;
+}
+
+export const AllPropertyTypesForm = (props: InspectionFormProps) => {
   const [selectedType, setSelectedType] = useState<string | null>(null);
 
   // Force scroll to top when the form opens
@@ -26,22 +25,7 @@ export const AllPropertyTypesForm = (props: Omit<InspectionFormProps, 'propertyT
   }, []);
 
   if (selectedType) {
-    switch (selectedType) {
-      case 'villa':
-        return <VillaInspectionForm {...props} />;
-      case 'apartment':
-        return <ApartmentInspectionForm {...props} />;
-      case 'land':
-        return <LandInspectionForm {...props} />;
-      case 'building':
-        return <BuildingInspectionForm {...props} />;
-      case 'office':
-        return <OfficeInspectionForm {...props} />;
-      case 'storage':
-        return <StorageInspectionForm {...props} />;
-      default:
-        return <VillaInspectionForm {...props} />;
-    }
+    return <StandardInspectionForm {...props} propertyType={selectedType} />;
   }
 
   return (
@@ -61,7 +45,7 @@ export const AllPropertyTypesForm = (props: Omit<InspectionFormProps, 'propertyT
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setSelectedType('villa')}
+            onClick={() => setSelectedType('فيلا')}
             className="p-4 bg-emerald-50 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-emerald-100 transition-colors"
           >
             <Home className="w-10 h-10 text-emerald-600" />
@@ -71,7 +55,7 @@ export const AllPropertyTypesForm = (props: Omit<InspectionFormProps, 'propertyT
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setSelectedType('apartment')}
+            onClick={() => setSelectedType('شقة')}
             className="p-4 bg-emerald-50 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-emerald-100 transition-colors"
           >
             <Building2 className="w-10 h-10 text-emerald-600" />
@@ -81,7 +65,7 @@ export const AllPropertyTypesForm = (props: Omit<InspectionFormProps, 'propertyT
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setSelectedType('land')}
+            onClick={() => setSelectedType('أرض')}
             className="p-4 bg-emerald-50 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-emerald-100 transition-colors"
           >
             <Map className="w-10 h-10 text-emerald-600" />
@@ -91,7 +75,7 @@ export const AllPropertyTypesForm = (props: Omit<InspectionFormProps, 'propertyT
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setSelectedType('building')}
+            onClick={() => setSelectedType('مبنى')}
             className="p-4 bg-emerald-50 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-emerald-100 transition-colors"
           >
             <Building className="w-10 h-10 text-emerald-600" />
@@ -101,7 +85,7 @@ export const AllPropertyTypesForm = (props: Omit<InspectionFormProps, 'propertyT
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setSelectedType('office')}
+            onClick={() => setSelectedType('مكتب')}
             className="p-4 bg-emerald-50 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-emerald-100 transition-colors"
           >
             <FileText className="w-10 h-10 text-emerald-600" />
@@ -111,7 +95,7 @@ export const AllPropertyTypesForm = (props: Omit<InspectionFormProps, 'propertyT
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setSelectedType('storage')}
+            onClick={() => setSelectedType('مستودع')}
             className="p-4 bg-emerald-50 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-emerald-100 transition-colors"
           >
             <Warehouse className="w-10 h-10 text-emerald-600" />

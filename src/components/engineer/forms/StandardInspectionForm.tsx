@@ -44,12 +44,14 @@ const tilesSection: Section = {
   questions: [
     {
       id: 'tile_type',
-      text: 'نوع البلاط ؟',
+      text: 'نوع البلاط',
       type: 'select',
       options: [
         { value: 'porcelain', label: 'بورسلان' },
         { value: 'marble', label: 'رخام' },
-        { value: 'ceramic', label: 'سراميك' },
+        { value: 'ceramic', label: 'سيراميك' },
+        { value: 'parquet', label: 'باركيه' },
+        { value: 'carpet', label: 'موكيت' },
         { value: 'other', label: 'أخرى' }
       ],
       requiresPhoto: true
@@ -62,22 +64,36 @@ const tilesSection: Section = {
       requiresNote: true
     },
     {
+      id: 'has_bathroom_wall_hollow',
+      text: 'هل يوجد تطبيل في جدران دورات المياه؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'has_kitchen_wall_hollow',
+      text: 'هل يوجد تطبيل في جدران المطبخ؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
       id: 'levelness_good',
-      text: 'هل يعتبر استواء الأرضيات جيد؟',
+      text: 'هل يُعتبر استواء الأرضيات جيد؟',
       type: 'boolean',
       requiresPhoto: true,
       requiresNote: true
     },
     {
       id: 'slope_good',
-      text: 'هل يعتبر ميول الأرضيات جيد؟',
+      text: 'هل يُعتبر ميول الأرضيات جيد؟',
       type: 'boolean',
       requiresPhoto: true,
       requiresNote: true
     },
     {
       id: 'slip_resistant',
-      text: 'هل يعتبر البلاط خشن ومقاوم للانزلاق؟',
+      text: 'هل يُعتبر بلاط دورات المياه خشن ومقاوم للانزلاق؟',
       type: 'boolean',
       requiresPhoto: true,
       requiresNote: true
@@ -97,28 +113,63 @@ const tilesSection: Section = {
       requiresNote: true
     },
     {
+      id: 'stairs_tile_type',
+      text: 'نوع بلاط الدرج',
+      type: 'select',
+      options: [
+        { value: 'porcelain', label: 'بورسلان' },
+        { value: 'marble', label: 'رخام' },
+        { value: 'ceramic', label: 'سيراميك' },
+        { value: 'parquet', label: 'باركيه' },
+        { value: 'carpet', label: 'موكيت' },
+        { value: 'other', label: 'أخرى' }
+      ],
+      requiresPhoto: true
+    },
+    {
+      id: 'has_stairs_hollow',
+      text: 'هل يوجد تطبيل في الدرج؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'stairs_slope_good',
+      text: 'هل يُعتبر ميول أرضيات الدرج جيد؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'stairs_height_good',
+      text: 'هل يُعتبر ارتفاع بلاط الدرج مناسب؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
       id: 'rating',
-      text: 'ضع تقييم من 1 إلى 10 لهذا البند',
+      text: 'التقييم العام للبلاط (من 1 إلى 10)',
       type: 'rating'
     }
   ]
 };
 
-// الجدران والواجهات
+// الجدران
 const wallsSection: Section = {
   id: 'walls',
-  title: 'الجدران والواجهات',
+  title: 'الجدران',
   questions: [
     {
       id: 'condition_good',
-      text: 'هل الجدران والواجهات بحالة جيدة؟',
+      text: 'هل الجدران بحالة جيدة؟',
       type: 'boolean',
       requiresPhoto: true,
       requiresNote: true
     },
     {
       id: 'has_cracks',
-      text: 'هل يوجد تشققات بالجدران والواجهات؟',
+      text: 'هل يوجد تشققات بالجدران؟',
       type: 'boolean',
       requiresPhoto: true,
       requiresNote: true
@@ -132,14 +183,14 @@ const wallsSection: Section = {
     },
     {
       id: 'has_water_damage',
-      text: 'هل يوجد أثر تسربات مياه على الجدران والواجهات؟',
+      text: 'هل يوجد أثر تسربات مياه على الجدران؟',
       type: 'boolean',
       requiresPhoto: true,
       requiresNote: true
     },
     {
       id: 'rating',
-      text: 'ضع تقييم من 1 إلى 10 لهذا البند',
+      text: 'التقييم العام للجدران (من 1 إلى 10)',
       type: 'rating'
     }
   ]
@@ -150,13 +201,6 @@ const electricalSection: Section = {
   id: 'electrical',
   title: 'الكهرباء',
   questions: [
-    {
-      id: 'meter_working',
-      text: 'هل تم تركيب عداد الكهرباء الخارجي ويعمل بشكل جيد؟',
-      type: 'boolean',
-      requiresPhoto: true,
-      requiresNote: true
-    },
     {
       id: 'switches_quality_good',
       text: 'هل المفاتيح والمقابس الكهربائية ذات جودة جيدة ومطابقة للمواصفات والمقاييس؟',
@@ -218,22 +262,15 @@ const electricalSection: Section = {
       requiresNote: true
     },
     {
-      id: 'outdoor_sockets_protected',
-      text: 'هل تم تغطية وحماية الأفياش الخارجية؟',
-      type: 'boolean',
-      requiresPhoto: true,
-      requiresNote: true
-    },
-    {
-      id: 'garden_wiring_installed',
-      text: 'هل تم تمديد الكهرباء لمنطقة الزراعة الخارجية؟',
+      id: 'has_satellite_phone',
+      text: 'هل يوجد تأسيس للستلايت والهاتف؟',
       type: 'boolean',
       requiresPhoto: true,
       requiresNote: true
     },
     {
       id: 'rating',
-      text: 'ضع تقييم من 1 إلى 10 لهذا البند',
+      text: 'التقييم العام للكهرباء (من 1 إلى 10)',
       type: 'rating'
     }
   ]
@@ -245,15 +282,15 @@ const plumbingSection: Section = {
   title: 'السباكة',
   questions: [
     {
-      id: 'water_meter_working',
-      text: 'هل تم تركيب عداد المياه ويعمل بشكل جيد؟',
+      id: 'has_sink_trap',
+      text: 'هل تم تركيب مصائد مياه (كوع ريحة) أسفل المغسلة؟',
       type: 'boolean',
       requiresPhoto: true,
       requiresNote: true
     },
     {
-      id: 'garden_plumbing_installed',
-      text: 'هل تم تأسيس السباكة لمنطقة الزراعة الخارجية؟',
+      id: 'fixtures_quality_good',
+      text: 'هل الأدوات الصحية ذات جودة جيدة؟',
       type: 'boolean',
       requiresPhoto: true,
       requiresNote: true
@@ -261,6 +298,27 @@ const plumbingSection: Section = {
     {
       id: 'drains_good',
       text: 'هل تم تركيب الصفايات بشكل جيد ومقاومة للصدأ؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'water_pressure_good',
+      text: 'هل قوة ضغط المياه جيدة؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'kitchen_plumbing_good',
+      text: 'هل تم تأسيس السباكة داخل المطبخ بشكل جيد؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'garden_plumbing_installed',
+      text: 'هل تم تأسيس السباكة لمنطقة الزراعة الخارجية؟',
       type: 'boolean',
       requiresPhoto: true,
       requiresNote: true
@@ -274,14 +332,14 @@ const plumbingSection: Section = {
     },
     {
       id: 'tank_covers_quality_good',
-      text: 'هل تعتبر أغطية الخزانات والصرف الصحي ذات جودة عالية ومقاومة للانكسارات؟',
+      text: 'هل تعتبر أغطية الخزانات ذات جودة عالية ومقاومة للانكسارات؟',
       type: 'boolean',
       requiresPhoto: true,
       requiresNote: true
     },
     {
       id: 'rating',
-      text: 'ضع تقييم من 1 إلى 10 لهذا البند',
+      text: 'التقييم العام للسباكة (من 1 إلى 10)',
       type: 'rating'
     }
   ]
@@ -302,7 +360,8 @@ const doorsSection: Section = {
         { value: 'glass', label: 'زجاج' },
         { value: 'steel', label: 'حديد غير مقاوم للصدأ' },
         { value: 'other', label: 'أخرى' }
-      ]
+      ],
+      requiresPhoto: true
     },
     {
       id: 'garage_door_type',
@@ -315,17 +374,18 @@ const doorsSection: Section = {
         { value: 'glass', label: 'زجاج' },
         { value: 'steel', label: 'حديد غير مقاوم للصدأ' },
         { value: 'other', label: 'أخرى' }
-      ]
+      ],
+      requiresPhoto: true
     },
     {
-      id: 'smooth_operation',
+      id: 'exterior_door_operation_good',
       text: 'هل سلاسة الفتح والإغلاق تعتبر جيدة للأبواب الخارجية؟',
       type: 'boolean',
       requiresPhoto: true,
       requiresNote: true
     },
     {
-      id: 'hardware_good',
+      id: 'exterior_door_hardware_good',
       text: 'هل مقابض ومفصلات الأبواب الخارجية تعتبر جيدة؟',
       type: 'boolean',
       requiresPhoto: true,
@@ -339,15 +399,214 @@ const doorsSection: Section = {
       requiresNote: true
     },
     {
-      id: 'weight_balance_good',
+      id: 'exterior_door_weight_good',
       text: 'هل تعتبر وزنية الأبواب الخارجية جيدة؟',
       type: 'boolean',
       requiresPhoto: true,
       requiresNote: true
     },
     {
+      id: 'interior_door_type',
+      text: 'نوع الأبواب الداخلية؟',
+      type: 'select',
+      options: [
+        { value: 'wood', label: 'خشب' },
+        { value: 'moisture_resistant_wood', label: 'خشب مقاوم للرطوبة' },
+        { value: 'glass', label: 'زجاج' },
+        { value: 'other', label: 'أخرى' }
+      ],
+      requiresPhoto: true
+    },
+    {
+      id: 'bathroom_door_type',
+      text: 'نوع أبواب دورات المياه؟',
+      type: 'select',
+      options: [
+        { value: 'wood', label: 'خشب' },
+        { value: 'moisture_resistant_wood', label: 'خشب مقاوم للرطوبة' },
+        { value: 'glass', label: 'زجاج' },
+        { value: 'aluminum', label: 'ألمنيوم' },
+        { value: 'other', label: 'أخرى' }
+      ],
+      requiresPhoto: true
+    },
+    {
+      id: 'interior_door_operation_good',
+      text: 'هل سلاسة الفتح والإغلاق تعتبر جيدة؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'interior_door_hardware_good',
+      text: 'هل المقابض والمفصلات تعتبر جيدة؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'bathroom_safety_lock_installed',
+      text: 'هل تم تركيب قفل الأمان (لكبار السن والأطفال) بدورات المياه؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
       id: 'rating',
-      text: 'ضع تقييم من 1 إلى 10 لهذا البند',
+      text: 'التقييم العام للأبواب (من 1 إلى 10)',
+      type: 'rating'
+    }
+  ]
+};
+
+// الأسقف
+const ceilingsSection: Section = {
+  id: 'ceilings',
+  title: 'الأسقف',
+  questions: [
+    {
+      id: 'ceiling_type',
+      text: 'نوع الأسقف؟',
+      type: 'select',
+      options: [
+        { value: 'gypsum_board', label: 'جبس بورد' },
+        { value: 'concrete', label: 'خرسانة' },
+        { value: 'gypsum', label: 'جبس بلدي' },
+        { value: 'other', label: 'أخرى' }
+      ],
+      requiresPhoto: true
+    },
+    {
+      id: 'has_ceiling_cracks',
+      text: 'هل يوجد تشققات بالأسقف؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'has_ceiling_water_damage',
+      text: 'هل يوجد أثر تسربات مياه على الأسقف؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'rating',
+      text: 'التقييم العام للأسقف (من 1 إلى 10)',
+      type: 'rating'
+    }
+  ]
+};
+
+// النوافذ
+const windowsSection: Section = {
+  id: 'windows',
+  title: 'النوافذ',
+  questions: [
+    {
+      id: 'window_type',
+      text: 'نوع النوافذ؟',
+      type: 'select',
+      options: [
+        { value: 'non_heat_resistant', label: 'زجاج غير مقاوم للحرارة' },
+        { value: 'heat_resistant', label: 'زجاج مقاوم للحرارة' },
+        { value: 'other', label: 'أخرى' }
+      ],
+      requiresPhoto: true
+    },
+    {
+      id: 'windows_standard_compliant',
+      text: 'هل النوافذ مطابقة للمواصفات والمقاييس؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'windows_operation_good',
+      text: 'هل سلاسة الفتح والإغلاق تعتبر جيدة؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'window_frames_good',
+      text: 'هل الإطارات وربلات الألمنيوم تعتبر جيدة؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'has_insect_screens',
+      text: 'هل تم تركيب شبك الحماية من الحشرات؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'window_size_appropriate',
+      text: 'هل حجم النوافذ مناسب لمساحة المكان؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'window_slope_good',
+      text: 'هل ميول مجرى النوافذ يعتبر جيد؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'window_hardware_good',
+      text: 'هل مقابض ومفصلات النوافذ تعتبر جيدة؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'rating',
+      text: 'التقييم العام للنوافذ (من 1 إلى 10)',
+      type: 'rating'
+    }
+  ]
+};
+
+// التهوية والتكييف
+const hvacSection: Section = {
+  id: 'hvac',
+  title: 'التهوية والتكييف',
+  questions: [
+    {
+      id: 'exhaust_fans_working',
+      text: 'هل تم تركيب مراوح الشفط وتعمل بشكل جيد؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'ac_installation_prepared',
+      text: 'هل تم تأسيس أماكن للمكيفات؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'ac_working_properly',
+      text: 'في حال وجود تكييف هل يعمل بشكل جيد؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'ventilation_size_appropriate',
+      text: 'هل حجم التهوية مناسب لمساحة المكان؟',
+      type: 'boolean',
+      requiresPhoto: true,
+      requiresNote: true
+    },
+    {
+      id: 'rating',
+      text: 'التقييم العام للتهوية والتكييف (من 1 إلى 10)',
       type: 'rating'
     }
   ]
@@ -359,7 +618,10 @@ const allSections: Section[] = [
   wallsSection,
   electricalSection,
   plumbingSection,
-  doorsSection
+  doorsSection,
+  ceilingsSection,
+  windowsSection,
+  hvacSection
 ];
 
 export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, propertyType }: InspectionFormProps) => {
@@ -384,6 +646,7 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
     neighborhood: '',
     propertyLocation: '',
     propertyArea: '',
+    floorLevel: 'الأرضي'
   });
   const reportRef = useRef<HTMLDivElement>(null);
   
@@ -480,6 +743,14 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
   const handleNext = () => {
     // Validate current section
     for (const question of currentSection.questions) {
+      // Skip conditional questions that don't apply
+      if (question.conditional) {
+        const dependsOnValue = answers[currentSection.id]?.[question.conditional.dependsOn];
+        if (dependsOnValue !== question.conditional.value) {
+          continue;
+        }
+      }
+      
       const answer = answers[currentSection.id]?.[question.id];
       if (answer === undefined) {
         setError(`الرجاء الإجابة على السؤال: ${question.text}`);
@@ -532,8 +803,9 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
       pdf.text(`موقع العقار: ${orderDetails.propertyLocation}`, 190, 55, { align: 'right' });
       pdf.text(`مساحة العقار: ${orderDetails.propertyArea}`, 190, 60, { align: 'right' });
       pdf.text(`نوع العقار: ${propertyType}`, 190, 65, { align: 'right' });
+      pdf.text(`الدور: ${orderDetails.floorLevel}`, 190, 70, { align: 'right' });
       
-      let yPosition = 75;
+      let yPosition = 80;
       
       // Add sections and answers
       for (const section of allSections) {
@@ -548,6 +820,14 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
         pdf.setFontSize(10);
         
         for (const question of section.questions) {
+          // Skip conditional questions that don't apply
+          if (question.conditional) {
+            const dependsOnValue = answers[section.id]?.[question.conditional.dependsOn];
+            if (dependsOnValue !== question.conditional.value) {
+              continue;
+            }
+          }
+          
           const answer = answers[section.id]?.[question.id];
           
           if (answer !== undefined) {
@@ -600,7 +880,7 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
       }
       
       // Save the PDF
-      pdf.save(`تقرير_فحص_${orderDetails.orderNumber}.pdf`);
+      pdf.save(`تقرير_فحص_${orderDetails.orderNumber || 'عقار'}.pdf`);
       
       setPdfGenerating(false);
     } catch (error) {
@@ -618,6 +898,14 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
       // Validate all required fields
       for (const section of allSections) {
         for (const question of section.questions) {
+          // Skip conditional questions that don't apply
+          if (question.conditional) {
+            const dependsOnValue = answers[section.id]?.[question.conditional.dependsOn];
+            if (dependsOnValue !== question.conditional.value) {
+              continue;
+            }
+          }
+          
           const answer = answers[section.id]?.[question.id];
           if (answer === undefined) {
             throw new Error(`الرجاء الإجابة على السؤال: ${question.text} في قسم ${section.title}`);
@@ -637,7 +925,7 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
       const { data: inspection, error: inspectionError } = await supabase.rpc('submit_inspection', {
         p_booking_id: bookingId,
         p_property_type: propertyType,
-        p_area: 'standard',
+        p_area: orderDetails.floorLevel,
         p_answers: answers,
         p_photos: photos,
         p_notes: notes,
@@ -748,6 +1036,20 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
                 className="w-full p-2 sm:p-3 rounded-xl border-2 border-gray-200 text-right"
                 placeholder="مساحة العقار"
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">الدور</label>
+              <select
+                value={orderDetails.floorLevel}
+                onChange={(e) => handleOrderDetailChange('floorLevel', e.target.value)}
+                className="w-full p-2 sm:p-3 rounded-xl border-2 border-gray-200 text-right"
+              >
+                <option value="الموقع العام">الموقع العام</option>
+                <option value="الأرضي">الأرضي</option>
+                <option value="الأول">الأول</option>
+                <option value="الثاني">الثاني</option>
+                <option value="الأسطح">الأسطح</option>
+              </select>
             </div>
           </div>
         </div>
@@ -1124,6 +1426,7 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
                           <p><span className="font-medium">موقع العقار:</span> {orderDetails.propertyLocation}</p>
                           <p><span className="font-medium">مساحة العقار:</span> {orderDetails.propertyArea}</p>
                           <p><span className="font-medium">نوع العقار:</span> {propertyType}</p>
+                          <p><span className="font-medium">الدور:</span> {orderDetails.floorLevel}</p>
                         </div>
                       </div>
                       
@@ -1132,6 +1435,14 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
                           <h4 className="font-bold text-lg mb-4">{section.title}</h4>
                           <div className="space-y-4">
                             {section.questions.map(question => {
+                              // Skip conditional questions that don't apply
+                              if (question.conditional) {
+                                const dependsOnValue = answers[section.id]?.[question.conditional.dependsOn];
+                                if (dependsOnValue !== question.conditional.value) {
+                                  return null;
+                                }
+                              }
+                              
                               const answer = answers[section.id]?.[question.id];
                               if (answer === undefined) return null;
                               

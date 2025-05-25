@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Building, Home, Map, Warehouse, FileText, Building2 } from 'lucide-react';
-import InspectionForm from './InspectionForm';
+import { AllPropertyTypesForm } from './forms/AllPropertyTypesForm';
 import { withRetry } from '../../utils/databaseHelpers';
+import { supabase } from '../../lib/supabase';
 
 interface InspectionFormSelectorProps {
   bookingId: string;
@@ -98,5 +99,5 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
     );
   }
 
-  return <InspectionForm bookingId={bookingId} onComplete={onComplete} />;
+  return <AllPropertyTypesForm bookingId={bookingId} onComplete={onComplete} />;
 }
