@@ -316,24 +316,9 @@ export const InspectionForm = ({ bookingId, onComplete }: InspectionFormProps) =
           <div className="fixed bottom-4 left-4 bg-emerald-50 text-emerald-600 px-3 py-2 rounded-lg text-sm flex items-center gap-2">
             <LoadingSpinner className="w-4 h-4" />
             <span>جاري حفظ المسودة...</span>
-            </div>
           </div>
         )}
       </motion.div>
     </motion.div>
-  );
-};
-
-
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-        >
-          {isSubmitting ? 'Submitting...' : 'Submit Inspection'}
-        </button>
-      </div>
-    </motion.form>
   );
 };
