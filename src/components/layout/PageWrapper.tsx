@@ -1,7 +1,8 @@
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { BackButton } from '../ui/BackButton';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuthStore } from '../../store/authStore';
 
 interface PageWrapperProps {
   children: React.ReactNode;
@@ -13,7 +14,7 @@ const pageTransition = {
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: 0 },
   transition: {
-    type: "spring",
+    type: 'spring',
     stiffness: 260,
     damping: 20,
     mass: 0.5
@@ -30,6 +31,7 @@ export const PageWrapper = ({ children, showBackButton = true }: PageWrapperProp
   const location = useLocation();
   const [dragStart, setDragStart] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const { loading } = useAuthStore();
 
   const handleDragStart = (event: MouseEvent | TouchEvent | PointerEvent) => {
     setIsDragging(true);
@@ -51,6 +53,14 @@ export const PageWrapper = ({ children, showBackButton = true }: PageWrapperProp
     }
   };
 
+  useEffect(() => {
+    // Prevent body scroll when loading
+    document.body.style.overflow = loading ? 'hidden' : 'auto';
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [loading]);
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -61,7 +71,7 @@ export const PageWrapper = ({ children, showBackButton = true }: PageWrapperProp
         dragElastic={0.4}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        className={`min-h-screen bg-gray-50 transition-all ${
+        className={`min-h-screen bg-gray-50 transition-all will-change-transform ${
           isDragging ? 'cursor-grabbing touch-none' : ''
         }`}
         style={{
@@ -69,7 +79,7 @@ export const PageWrapper = ({ children, showBackButton = true }: PageWrapperProp
         }}
       >
         {showBackButton && location.pathname !== '/' && <BackButton />}
-        {children}
+        {!loading && children}
       </motion.div>
     </AnimatePresence>
   );
