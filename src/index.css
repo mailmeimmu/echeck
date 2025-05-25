@@ -4,26 +4,23 @@
 @tailwind components;
 @tailwind utilities;
 
-:root[dir="rtl"] {
-  direction: rtl;
-}
-
-:root[dir="ltr"] {
-  direction: ltr;
-}
+:root {
+  direction: rtl; 
+} 
 
 body {
   font-family: 'Cairo', sans-serif;
   background-color: #f8fafc; 
   -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  touch-action: pan-y pinch-zoom;
 }
 
-.rtl {
-  direction: rtl;
-}
-
-.ltr {
-  direction: ltr;
+/* Smooth scrolling */
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    scroll-behavior: smooth;
+  }
 }
 
 @layer components {
@@ -51,14 +48,6 @@ body {
            focus:ring-2 focus:ring-emerald-500 focus:border-transparent 
            transition-all duration-300 outline-none
            shadow-sm;
-  }
-
-  :root[dir="rtl"] .input-field {
-    @apply text-right;
-  }
-
-  :root[dir="ltr"] .input-field {
-    @apply text-left;
   }
   
   .card {
