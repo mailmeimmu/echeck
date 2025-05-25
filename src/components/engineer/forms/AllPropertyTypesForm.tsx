@@ -12,6 +12,19 @@ import { InspectionFormProps } from './StandardInspectionForm';
 export const AllPropertyTypesForm = (props: Omit<InspectionFormProps, 'propertyType'>) => {
   const [selectedType, setSelectedType] = useState<string | null>(null);
 
+  // Force scroll to top when the form opens
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    
+    // Prevent body scrolling when form is open
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      // Re-enable body scrolling when form closes
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
   if (selectedType) {
     switch (selectedType) {
       case 'villa':

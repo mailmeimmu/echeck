@@ -389,7 +389,16 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
   
   // Scroll to top when form opens
   useEffect(() => {
+    // Force scroll to top when the form opens
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Prevent body scrolling when form is open
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      // Re-enable body scrolling when form closes
+      document.body.style.overflow = 'auto';
+    };
   }, []);
 
   const {
@@ -755,13 +764,14 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center p-0 sm:p-4 overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
         >
           <BackButton />
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="bg-white rounded-2xl sm:rounded-3xl shadow-xl w-full min-h-screen sm:min-h-0 sm:w-[95%] sm:max-w-3xl sm:max-h-[90vh] flex flex-col p-4 sm:p-6 my-0 sm:my-4"
+            className="bg-white rounded-2xl sm:rounded-3xl shadow-xl w-full min-h-screen sm:min-h-0 sm:w-[95%] sm:max-w-3xl sm:max-h-[90vh] flex flex-col p-4 sm:p-6 my-0 sm:my-4 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
