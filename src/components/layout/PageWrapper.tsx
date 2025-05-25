@@ -14,10 +14,9 @@ const pageTransition = {
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: 0 },
   transition: {
-    type: 'spring',
-    stiffness: 260,
-    damping: 20,
-    mass: 0.5
+    type: 'tween',
+    duration: 0.3,
+    ease: 'easeInOut'
   }
 };
 
@@ -66,6 +65,7 @@ export const PageWrapper = ({ children, showBackButton = true }: PageWrapperProp
       <motion.div
         key={location.pathname}
         {...pageTransition}
+        layoutId="page"
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.4}
@@ -79,7 +79,19 @@ export const PageWrapper = ({ children, showBackButton = true }: PageWrapperProp
         }}
       >
         {showBackButton && location.pathname !== '/' && <BackButton />}
-        {!loading && children}
+        <AnimatePresence mode="wait">
+          {!loading && (
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {children}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </AnimatePresence>
   );
