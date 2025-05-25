@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Upload, X, Image as ImageIcon, Camera, Smartphone } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase';
+import { withRetry } from '../../utils/databaseHelpers';
 
 interface PhotoUploaderProps {
   inspectionId: string;
@@ -42,47 +43,21 @@ export const PhotoUploader = ({ inspectionId, section, photos = [], onUpload }: 
         throw new Error('حجم الصورة يجب أن لا يتجاوز 5 ميجابايت');
       }
 
-      // Upload to Supabase Storage with retry logic
-      let attempts = 0;
-      const maxAttempts = 3;
-      let lastError = null;
-      let data = null;
-      
-      while (attempts < maxAttempts) {
-        try {
-          const fileName = `${inspectionId}/${section}/${Date.now()}-${file.name}`;
-          const result = await supabase.storage
-            .from('inspection-photos')
-            .upload(fileName, file, {
-              cacheControl: '3600',
-              upsert: false
-            });
-            
-          if (result.error) throw result.error;
-          data = result.data;
-          break; // Success, exit loop
-        } catch (error) {
           lastError = error;
-          attempts++;
+      // Use withRetry for more reliable uploads
+      const data = await withRetry(async () => {
+        const fileName = `${inspectionId}/${section}/${Date.now()}-${file.name}`;
+        const result = await supabase.storage
+          .from('inspection-photos')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
           
-          // Only retry on connection errors
-          if (error instanceof Error && 
-              (error.message.includes('network') || 
-               error.message.includes('connection') ||
-               error.message.includes('timeout'))) {
-            console.warn(`Upload attempt ${attempts} failed, retrying...`);
-            await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
-            continue;
-          }
-          
-          // For other errors, throw immediately
-          throw error;
-        }
-      }
+        if (result.error) throw result.error;
+        return result.data;
+      }, 5);
       
-      // If we've exhausted retries, throw the last error
-      if (!data && lastError) throw lastError;
-
       if (!data) throw new Error('فشل تحميل الصورة');
 
       // Get public URL
