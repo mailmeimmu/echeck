@@ -15,7 +15,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 interface InspectionFormProps {
   bookingId: string;
-  onComplete?: () => void;
+  onComplete?: () => void; // Made optional with ?
 }
 
 interface Step {
@@ -365,7 +365,7 @@ const inspectionSections: InspectionSection[] = [
   }
 ];
 
-export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionFormProps) => {
+export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionFormProps) => { // Added default value
   const { user } = useAuthStore();
   const { data: engineer } = useEngineer(user?.id);
   const [currentStep, setCurrentStep] = useState(0);
@@ -380,6 +380,7 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
   const [showPreview, setShowPreview] = useState(false);
   const reportRef = React.useRef<HTMLDivElement>(null);
   
+  // Scroll to top when form opens
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
@@ -391,17 +392,19 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
     deleteDraft
   } = useInspectionDraft(bookingId, engineer?.id || '');
 
+  // Load draft data on mount
   useEffect(() => {
     if (draft?.data) {
-      if (draft.data.answers) setAnswers(draft.data.answers);
-      if (draft.data.photos) setPhotos(draft.data.photos);
-      if (draft.data.notes) setNotes(draft.data.notes);
+      setAnswers(draft.data.answers || {});
+      setPhotos(draft.data.photos || {});
+      setNotes(draft.data.notes || {});
     }
   }, [draft]);
 
+  // Auto-save when form data changes
   useEffect(() => {
     const debouncedSave = setTimeout(() => {
-      if (Object.keys(answers).length > 0 || Object.keys(photos).length > 0 || Object.keys(notes).length > 0) {
+      if (Object.keys(answers).length > 0) {
         saveDraft({
           answers,
           photos,
@@ -413,10 +416,13 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
     return () => clearTimeout(debouncedSave);
   }, [answers, photos, notes, saveDraft]);
 
+  // Notify parent components when the form opens or closes
   useEffect(() => {
+    // Dispatch custom event when form opens
     window.dispatchEvent(new CustomEvent('inspection-form-open'));
     
     return () => {
+      // Dispatch custom event when form closes
       window.dispatchEvent(new CustomEvent('inspection-form-close'));
     };
   }, []);
@@ -448,6 +454,7 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
   const currentSection = inspectionSections[currentStep];
 
   const handleNext = () => {
+    // Validate current section
     for (const question of currentSection.questions) {
       const answer = answers[currentSection.id]?.[question.id];
       if (answer === undefined) {
@@ -482,24 +489,30 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
     try {
       setPdfGenerating(true);
       
+      // Create a new PDF document
       const pdf = new jsPDF('p', 'mm', 'a4');
       
+      // Add title
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(20);
       pdf.text('تقرير فحص العقار', 105, 20, { align: 'center' });
       
+      // Add date
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'normal');
       pdf.text(`تاريخ الفحص: ${new Date().toLocaleDateString('ar-SA')}`, 105, 30, { align: 'center' });
       
       let yPosition = 40;
       
+      // Add sections and answers
       for (const section of inspectionSections) {
+        // Add section title
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(16);
         pdf.text(section.title, 190, yPosition, { align: 'right' });
         yPosition += 10;
         
+        // Add questions and answers
         pdf.setFont('helvetica', 'normal');
         pdf.setFontSize(12);
         
@@ -518,15 +531,18 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
               answerText = `${answer}/10`;
             }
             
+            // Add question and answer
             pdf.text(`${question.text}: ${answerText}`, 190, yPosition, { align: 'right' });
             yPosition += 8;
             
+            // Add notes if any
             const note = notes[`${section.id}_${question.id}`];
             if (note) {
               pdf.text(`ملاحظات: ${note}`, 190, yPosition, { align: 'right' });
               yPosition += 8;
             }
             
+            // Check if we need a new page
             if (yPosition > 270) {
               pdf.addPage();
               yPosition = 20;
@@ -536,12 +552,14 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
         
         yPosition += 10;
         
+        // Check if we need a new page
         if (yPosition > 270) {
           pdf.addPage();
           yPosition = 20;
         }
       }
       
+      // Save the PDF
       pdf.save('تقرير_فحص_العقار.pdf');
       
       setPdfGenerating(false);
@@ -557,6 +575,7 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
     setError(null);
 
     try {
+      // Validate all required fields
       for (const section of inspectionSections) {
         for (const question of section.questions) {
           const answer = answers[section.id]?.[question.id];
@@ -574,6 +593,7 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
         }
       }
 
+      // Submit inspection data
       const { data: inspection } = await supabase.rpc('submit_inspection', {
         p_booking_id: bookingId,
         p_tiles_data: answers.tiles,
@@ -585,10 +605,12 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
         p_notes: notes
       });
 
+      // Generate PDF report
       await generatePDF();
       
       setSuccess(true);
       
+      // Close modal after success
       setTimeout(() => {
         onComplete();
       }, 3000);
@@ -618,32 +640,22 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
             className="bg-white rounded-2xl sm:rounded-3xl shadow-xl w-full min-h-screen sm:min-h-0 sm:w-[95%] sm:max-w-3xl sm:max-h-[90vh] flex flex-col p-4 sm:p-6 my-0 sm:my-4"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Close button */}
             <div className="flex justify-between items-center mb-3 sm:mb-5 flex-shrink-0 sticky top-0 bg-white z-10 pb-2 border-b border-gray-100 pt-2">
               <h2 className="text-xl sm:text-2xl font-bold">تقرير الفحص</h2>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    saveDraft({
-                      answers,
-                      photos,
-                      notes
-                    });
-                  }}
+                  onClick={() => saveDraft({
+                    answers,
+                    photos,
+                    notes
+                  })}
                   disabled={isSaving}
                 >
-                  {isSaving ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    >
-                      <Save className="w-4 h-4" />
-                    </motion.div>
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}
-                  <span>{isSaving ? 'جاري الحفظ...' : 'حفظ المسودة'}</span>
+                  <Save className="w-4 h-4" />
+                  <span>حفظ المسودة</span>
                 </Button>
                 <button
                   onClick={() => !loading && onComplete?.()}
@@ -683,6 +695,7 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
               </motion.div>
             ) : (
               <div className="flex flex-col h-full overflow-hidden">
+                {/* Progress Bar */}
                 <div className="bg-gray-100 h-2 rounded-full overflow-hidden flex-shrink-0 mb-4">
                   <motion.div
                     className="h-full bg-emerald-500"
@@ -691,6 +704,7 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                   />
                 </div>
 
+                {/* Section Title */}
                 <motion.div
                   key={`title-${currentSection.id}`}
                   initial={{ opacity: 0, x: 20 }}
@@ -703,6 +717,7 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                   </p>
                 </motion.div>
 
+                {/* Questions */}
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={`section-${currentSection.id}`}
@@ -736,127 +751,257 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                               onClick={() => handleAnswer(currentSection.id, question.id, false)}
                               className={`flex-1 p-2 sm:p-3 rounded-xl border-2 transition-colors ${
                                 answers[currentSection.id]?.[question.id] === false
-                                  ? 'border-red-500 bg-red-50'
-                                  : 'border-gray-200 hover:border-red-500'
+                                  ? 'border-emerald-500 bg-emerald-50'
+                                  : 'border-gray-200 hover:border-emerald-500'
                               }`}
                             >
                               لا
                             </button>
                           </div>
                         )}
-
+                        
                         {question.type === 'select' && (
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          <select
+                            value={answers[currentSection.id]?.[question.id] || ''}
+                            onChange={(e) => handleAnswer(currentSection.id, question.id, e.target.value)}
+                            className="w-full p-2  sm:p-3 rounded-xl border-2 border-gray-200 text-right"
+                          
+                          >
+                            <option value="">اختر...</option>
                             {question.options?.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                        
+                        {question.type === 'rating' && (
+                          <div className="grid grid-cols-5 sm:grid-cols-10 gap-1 sm:gap-2">
+                            {Array.from({ length: 10 }, (_, i) => (
                               <button
-                                key={option.value}
-                                onClick={() => handleAnswer(currentSection.id, question.id, option.value)}
-                                className={`p-2 sm:p-3 rounded-xl border-2 transition-colors ${
-                                  answers[currentSection.id]?.[question.id] === option.value
+                                key={i}
+                                onClick={() => handleAnswer(currentSection.id, question.id, i + 1)}
+                                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 transition-colors ${
+                                  answers[currentSection.id]?.[question.id] === i + 1
                                     ? 'border-emerald-500 bg-emerald-50'
                                     : 'border-gray-200 hover:border-emerald-500'
                                 }`}
                               >
-                                {option.label}
+                                {i + 1}
                               </button>
                             ))}
                           </div>
                         )}
 
-                        {question.type === 'rating' && (
-                          <div className="flex gap-2 justify-center">
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
-                              <button
-                                key={rating}
-                                onClick={() => handleAnswer(currentSection.id, question.id, rating)}
-                                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                                  answers[currentSection.id]?.[question.id] === rating
-                                    ? 'bg-emerald-500 text-white'
-                                    : 'bg-gray-100 hover:bg-emerald-100'
-                                }`}
-                              >
-                                {rating}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-
-                        {question.requiresPhoto && (
+                        {/* Show notes input if answer is "No" and notes are required */}
+                        {question.requiresNote && 
+                         answers[currentSection.id]?.[question.id] === false && (
                           <div className="mt-4">
-                            <PhotoUploader
-                              onUpload={(url) => handlePhotoUpload(`${currentSection.id}_${question.id}`, url)}
-                              photos={photos[`${currentSection.id}_${question.id}`] || []}
-                            />
-                          </div>
-                        )}
-
-                        {question.requiresNote && answers[currentSection.id]?.[question.id] === false && (
-                          <div className="mt-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              الرجاء إضافة ملاحظة:
+                            </label>
                             <textarea
                               value={notes[`${currentSection.id}_${question.id}`] || ''}
                               onChange={(e) => handleNote(currentSection.id, question.id, e.target.value)}
-                              placeholder="أضف ملاحظاتك هنا..."
-                              className="w-full p-2 border border-gray-300 rounded-lg"
+                              className="w-full p-2 sm:p-3 rounded-xl border-2 border-gray-200 text-right"
                               rows={3}
+                              placeholder="اكتب ملاحظاتك هنا..."
                             />
                           </div>
+                        )}
+                        
+                        {question.requiresPhoto && (
+                          <PhotoUploader
+                            inspectionId={bookingId}
+                            section={`${currentSection.id}_${question.id}`}
+                            onUpload={(url) => handlePhotoUpload(`${currentSection.id}_${question.id}`, url)}
+                          />
                         )}
                       </motion.div>
                     ))}
                   </motion.div>
                 </AnimatePresence>
 
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg mt-4 flex items-center gap-2"
-                  >
-                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                    <p>{error}</p>
-                  </motion.div>
-                )}
-
-                <div className="flex justify-between mt-6 pt-4 border-t border-gray-100">
-                  <Button
-                    onClick={handlePrevious}
-                    disabled={currentStep === 0}
-                    variant="outline"
-                  >
-                    <ChevronRight className="w-5 h-5 ml-1" />
-                    السابق
-                  </Button>
-
-                  {currentStep === inspectionSections.length - 1 ? (
+                {/* Navigation Buttons */}
+                <div className="flex gap-3 mt-2 sm:mt-4 pt-4 border-t border-gray-100 flex-shrink-0 sticky bottom-0 bg-white pb-1 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                  {currentStep > 0 && (
+                    <Button
+                      onClick={handlePrevious}
+                      variant="secondary"
+                      className="flex-1"
+                      disabled={loading}
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                      <span>السابق</span>
+                    </Button>
+                  )}
+                  
+                  {currentStep < inspectionSections.length - 1 ? (
+                    <Button
+                      onClick={handleNext}
+                      className="flex-1 bg-emerald-500 hover:bg-emerald-600 shadow-md"
+                      disabled={loading}
+                    >
+                      <span>التالي</span>
+                      <ChevronLeft className="w-5 h-5" />
+                    </Button>
+                  ) : (
+                  <div className="flex gap-2 w-full">
+                    <Button
+                      onClick={() => setShowPreview(true)}
+                      className="flex-1"
+                      disabled={loading}
+                    >
+                      <FileText className="w-5 h-5" />
+                      <span>معاينة التقرير</span>
+                    </Button>
                     <Button
                       onClick={handleSubmit}
+                      className="flex-1"
                       disabled={loading}
-                      className="bg-emerald-500 hover:bg-emerald-600"
                     >
                       {loading ? (
-                        <>
-                          <LoadingSpinner className="w-5 h-5 ml-2" />
-                          جاري الحفظ...
-                        </>
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className="w-5 h-5"
+                        >
+                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        </motion.div>
                       ) : (
                         <>
-                          <FileText className="w-5 h-5 ml-2" />
-                          حفظ التقرير
+                          <CheckCircle className="w-5 h-5" />
+                          <span>إرسال التقرير</span>
                         </>
                       )}
                     </Button>
-                  ) : (
-                    <Button onClick={handleNext}>
-                      التالي
-                      <ChevronLeft className="w-5 h-5 mr-1" />
-                    </Button>
+                  </div>
                   )}
                 </div>
               </div>
             )}
+          {/* Preview Modal */}
+          <AnimatePresence>
+            {showPreview && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+                onClick={() => setShowPreview(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.95, opacity: 0 }}
+                  className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-2xl font-bold">معاينة التقرير</h3>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowPreview(false)}
+                    >
+                      <X className="w-5 h-5" />
+                      <span>إغلاق</span>
+                    </Button>
+                  </div>
+
+                  {/* Preview content */}
+                  <div className="space-y-6">
+                    {inspectionSections.map((section, index) => (
+                      <div key={section.id} className="border rounded-xl p-4">
+                        <h4 className="font-bold text-lg mb-4">{section.title}</h4>
+                        <div className="space-y-4">
+                          {section.questions.map(question => (
+                            <div key={question.id} className="space-y-2">
+                              <p className="font-medium">{question.text}</p>
+                              <p className="text-gray-600">
+                                {answers[section.id]?.[question.id]}
+                              </p>
+                              {notes[`${section.id}_${question.id}`] && (
+                                <p className="text-sm text-gray-500">
+                                  ملاحظات: {notes[`${section.id}_${question.id}`]}
+                                </p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 flex gap-2">
+                    <Button
+                      onClick={handleSubmit}
+                      className="flex-1"
+                    >
+                      <CheckCircle className="w-5 h-5" />
+                      <span>إرسال التقرير</span>
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => setShowPreview(false)}
+                      className="flex-1"
+                    >
+                      <span>تعديل</span>
+                    </Button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-3 p-3 bg-red-50 text-red-600 rounded-lg flex items-center gap-2 text-right flex-shrink-0 shadow-sm"
+              >
+                <AlertCircle className="w-5 h-5" />
+                <span>{error}</span>
+              </motion.div>
+            )}
           </motion.div>
         </motion.div>
       )}
+      
+      {(loading && !pdfGenerating) && <LoadingSpinner />}
+      
+      {pdfGenerating && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex flex-col items-center justify-center"
+        >
+          <motion.div
+            animate={{ 
+              rotate: 360 
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            className="w-16 h-16 mb-4"
+          >
+            <FileText className="w-full h-full text-white" />
+          </motion.div>
+          <p className="text-white text-lg font-bold">جاري إنشاء التقرير...</p>
+        </motion.div>
+      )}
+      
+      {/* Hidden div for PDF generation */}
+      <div className="hidden">
+        <div ref={reportRef} className="p-8 bg-white" dir="rtl">
+          {/* PDF content will be rendered here */}
+        </div>
+      </div>
     </AnimatePresence>
   );
 };

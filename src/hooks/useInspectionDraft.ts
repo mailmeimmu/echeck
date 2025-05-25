@@ -7,8 +7,6 @@ export const useInspectionDraft = (bookingId: string, engineerId: string) => {
   const draftQuery = useQuery({
     queryKey: ['inspectionDraft', bookingId],
     queryFn: async () => {
-      if (!bookingId || !engineerId) return null;
-
       const { data, error } = await supabase
         .from('inspection_drafts')
         .select('*')
@@ -19,41 +17,18 @@ export const useInspectionDraft = (bookingId: string, engineerId: string) => {
       if (error && error.code !== 'PGRST116') throw error;
       return data;
     },
-    enabled: !!bookingId && !!engineerId,
   });
 
   const saveDraft = useMutation({
     mutationFn: async (data: any) => {
-      if (!bookingId || !engineerId) return;
-
-      // First check if a draft already exists
-      const { data: existingDraft, error: checkError } = await supabase
-        .from('inspection_drafts')
-        .select('id')
-        .eq('booking_id', bookingId)
-        .eq('engineer_id', engineerId)
-        .maybeSingle();
-
-      if (checkError && checkError.code !== 'PGRST116') throw checkError;
-
-      // If draft exists, update it
-      if (existingDraft) {
-        const { error: updateError } = await supabase
-          .from('inspection_drafts')
-          .update({ data })
-          .eq('id', existingDraft.id);
-
-        if (updateError) throw updateError;
-        return;
-      }
-
-      // Otherwise insert a new draft
       const { error } = await supabase
         .from('inspection_drafts')
-        .insert({
+        .upsert({
           booking_id: bookingId,
           engineer_id: engineerId,
           data
+        }, {
+          onConflict: 'booking_id,engineer_id'
         });
 
       if (error) throw error;
@@ -61,9 +36,6 @@ export const useInspectionDraft = (bookingId: string, engineerId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inspectionDraft', bookingId] });
     },
-    onError: (error) => {
-      console.error('Error saving draft:', error);
-    }
   });
 
   const deleteDraft = useMutation({
@@ -84,8 +56,6 @@ export const useInspectionDraft = (bookingId: string, engineerId: string) => {
   return {
     draft: draftQuery.data,
     isLoading: draftQuery.isLoading,
-    isError: draftQuery.isError,
-    error: draftQuery.error,
     saveDraft: saveDraft.mutate,
     isSaving: saveDraft.isPending,
     deleteDraft: deleteDraft.mutate,
