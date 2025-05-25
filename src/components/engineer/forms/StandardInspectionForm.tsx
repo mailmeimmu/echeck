@@ -1552,3 +1552,5 @@ export const StandardInspectionForm = ({ bookingId, onComplete = () => {}, prope
     </AnimatePresence>
   );
 };
+
+export { StandardInspectionForm }

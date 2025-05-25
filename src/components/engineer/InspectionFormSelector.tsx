@@ -54,9 +54,9 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center overflow-y-auto"
       >
-        <div className="bg-white rounded-2xl p-8 max-w-md w-[95%] text-center m-auto">
+        <div className="bg-white rounded-2xl p-8 max-w-md w-[95%] text-center my-8 mx-auto">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
@@ -73,10 +73,13 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center overflow-y-auto"
         onClick={onComplete}
       >
-        <div className="bg-white rounded-2xl p-8 max-w-md w-[95%] text-center m-auto" onClick={(e) => e.stopPropagation()}>
+        <div 
+          className="bg-white rounded-2xl p-8 max-w-md w-[95%] text-center my-8 mx-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="text-red-500 text-xl mb-4">⚠️</div>
           <p className="text-lg font-medium mb-4">{error}</p>
           <div className="flex gap-4 justify-center">
