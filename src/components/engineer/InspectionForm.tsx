@@ -11,6 +11,7 @@ import { PhotoUploader } from './PhotoUploader';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import React, { useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface InspectionFormProps {
   bookingId: string;
@@ -758,7 +759,7 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                           <select
                             value={answers[currentSection.id]?.[question.id] || ''}
                             onChange={(e) => handleAnswer(currentSection.id, question.id, e.target.value)}
-                            className="w-full p-2 sm:p-3 rounded-xl border-2 border-gray-200 text-right"
+                            className="w-full p-2  sm:p-3 rounded-xl border-2 border-gray-200 text-right"
                           
                           >
                             <option value="">اختر...</option>
