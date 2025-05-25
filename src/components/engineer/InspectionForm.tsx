@@ -241,3 +241,5 @@ export default function InspectionForm({ bookingId, engineerId, onSubmit }: Insp
     </form>
   );
 }
+
+export { InspectionForm }
