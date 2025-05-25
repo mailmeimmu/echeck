@@ -595,20 +595,20 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
   return (
     <AnimatePresence>
       {showModal && (
-        <motion.div
-          key="inspection-form-modal"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-0 sm:p-4"
-          onClick={() => !loading && onComplete?.()}
-        >
+        <motion.div 
+          key="inspection-form-modal" 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+          exit={{ opacity: 0 }} 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-0 sm:p-4" 
+          onClick={() => !loading && onComplete?.()} 
+        > 
           <BackButton />
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="bg-white rounded-2xl sm:rounded-3xl shadow-xl w-full min-h-screen sm:min-h-0 sm:w-[95%] sm:max-w-3xl sm:max-h-[90vh] flex flex-col p-4 sm:p-6 my-0 sm:my-4 overflow-hidden"
+            className="bg-white rounded-2xl sm:rounded-3xl shadow-xl w-full h-full sm:h-auto sm:w-[95%] sm:max-w-3xl sm:max-h-[90vh] flex flex-col p-4 sm:p-6 my-0 sm:my-4 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
@@ -667,7 +667,7 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
             ) : (
               <div className="flex flex-col h-full overflow-hidden">
                 {/* Progress Bar */}
-                <div className="bg-gray-100 h-2 rounded-full overflow-hidden flex-shrink-0 mb-4">
+                <div className="bg-gray-100 h-2 rounded-full overflow-hidden flex-shrink-0 mb-2">
                   <motion.div
                     className="h-full bg-emerald-500"
                     initial={{ width: 0 }}
@@ -689,13 +689,14 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
                 </motion.div>
 
                 {/* Questions */}
-                <AnimatePresence mode="wait">
+                <div className="flex-1 overflow-y-auto">
+                  <AnimatePresence mode="wait">
                   <motion.div
                     key={`section-${currentSection.id}`}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="space-y-4 sm:space-y-6 overflow-y-auto flex-grow px-1 pb-4"
+                    className="space-y-4 sm:space-y-6 px-1 pb-4"
                   >
                     {currentSection.questions.map((question) => (
                       <motion.div
@@ -786,10 +787,11 @@ export default function InspectionForm({ bookingId, onComplete = () => {} }: Ins
                       </motion.div>
                     ))}
                   </motion.div>
-                </AnimatePresence>
+                  </AnimatePresence>
+                </div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100 flex-shrink-0 sticky bottom-0 bg-white z-10">
+              <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100 flex-shrink-0 bg-white sticky bottom-0">
                 <Button
                   variant="outline"
                   onClick={handlePrevious}

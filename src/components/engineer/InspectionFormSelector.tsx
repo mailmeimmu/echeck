@@ -63,7 +63,22 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
   }, []);
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
+      >
+        <div className="bg-white rounded-2xl p-8 max-w-md w-[95%] text-center">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4"
+          />
+          <p className="text-lg font-medium">جاري التحقق من الاتصال...</p>
+        </div>
+      </motion.div>
+    );
   }
 
   if (error) {
@@ -71,11 +86,11 @@ export const InspectionFormSelector = ({ bookingId, onComplete = () => {} }: Ins
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center overflow-y-auto"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
         onClick={onComplete}
       >
         <div 
-          className="bg-white rounded-2xl p-8 max-w-md w-[95%] text-center my-8 mx-auto"
+          className="bg-white rounded-2xl p-8 max-w-md w-[95%] text-center m-4"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="text-red-500 text-xl mb-4">
