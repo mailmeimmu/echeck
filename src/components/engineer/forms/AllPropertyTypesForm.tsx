@@ -30,13 +30,15 @@ export const AllPropertyTypesForm = (props: InspectionFormProps) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
+      onClick={props.onComplete}
       onClick={props.onComplete}
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 my-auto mx-4"
+        className="bg-white rounded-2xl shadow-xl w-[95%] max-w-md p-6 m-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl font-bold mb-6 text-center">اختر نوع العقار</h2>
