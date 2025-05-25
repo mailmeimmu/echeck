@@ -233,79 +233,98 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 }));
 
-const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+// Initialize auth state
+(async () => {
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-if (sessionError) {
-  console.error('Session error:', sessionError);
-  await clearAuthState();
-  return;
-}
-
-if (!session?.user) {
-  useAuthStore.setState({
-    user: null,
-    isEngineer: false,
-    loading: false,
-    initialized: true
-  });
-  return;
-}
-
-try {
-  // Check if refresh token exists before attempting refresh
-  if (!session.refresh_token) {
-    console.warn('No refresh token found, clearing auth state');
-    await clearAuthState();
+  if (sessionError) {
+    console.error('Session error:', sessionError);
+    useAuthStore.setState({
+      user: null,
+      isEngineer: false,
+      loading: false,
+      initialized: true
+    });
     return;
   }
 
-  // Only attempt to refresh if we have a valid access token
-  if (session.access_token) {
-    const { error: refreshError } = await supabase.auth.refreshSession();
-    
-    // Handle specific refresh token errors
-    if (refreshError) {
-      console.warn('Session refresh error:', refreshError.message);
-      if (refreshError.message.includes('refresh_token_not_found') || 
-          refreshError.message.includes('Invalid Refresh Token')) {
-        await clearAuthState();
-        return;
+  if (!session?.user) {
+    useAuthStore.setState({
+      user: null,
+      isEngineer: false,
+      loading: false,
+      initialized: true
+    });
+    return;
+  }
+
+  try {
+    // Check if refresh token exists before attempting refresh
+    if (!session.refresh_token) {
+      console.warn('No refresh token found, clearing auth state');
+      useAuthStore.setState({
+        user: null,
+        isEngineer: false,
+        loading: false,
+        initialized: true
+      });
+      return;
+    }
+
+    // Only attempt to refresh if we have a valid access token
+    if (session.access_token) {
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      
+      // Handle specific refresh token errors
+      if (refreshError) {
+        console.warn('Session refresh error:', refreshError.message);
+        if (refreshError.message.includes('refresh_token_not_found') || 
+            refreshError.message.includes('Invalid Refresh Token')) {
+          useAuthStore.setState({
+            user: null,
+            isEngineer: false,
+            loading: false,
+            initialized: true
+          });
+          return;
+        }
       }
     }
-  }
 
-  // Get fresh session after potential refresh
-  const { data: { session: freshSession } } = await supabase.auth.getSession();
-  if (!freshSession) {
-    console.warn('No fresh session available after refresh');
-    await clearAuthState();
-    return;
-  }
+    // Get fresh session after potential refresh
+    const { data: { session: freshSession } } = await supabase.auth.getSession();
+    if (!freshSession) {
+      console.warn('No fresh session available after refresh');
+      useAuthStore.setState({
+        user: null,
+        isEngineer: false,
+        loading: false,
+        initialized: true
+      });
+      return;
+    }
 
-  const { profile, isEngineer } = await initializeUserData(freshSession);
+    const profile = await createOrUpdateProfile(freshSession.user.id, freshSession.user.email);
+    const { data: engineerData } = await supabase
+      .from('engineers')
+      .select('*')
+      .eq('user_id', profile.id)
+      .eq('status', 'active')
+      .maybeSingle();
 
-  // Pre-fetch engineer data if needed
-  if (isEngineer) {
-    await queryClient.prefetchQuery({
-      queryKey: ['engineer', profile.id],
-      queryFn: async () => {
-        const { data } = await supabase
-          .from('engineers')
-          .select('*, profiles!engineers_user_id_fkey(email, first_name)')
-          .eq('user_id', profile.id)
-          .single();
-        return data;
-      }
+    useAuthStore.setState({ 
+      user: profile,
+      isEngineer: !!engineerData,
+      loading: false,
+      initialized: true
+    });
+  } catch (error) {
+    console.error('Error initializing user data:', error);
+    useAuthStore.setState({
+      user: null,
+      isEngineer: false,
+      loading: false,
+      initialized: true
     });
   }
-
-  useAuthStore.setState({ 
-    user: profile,
-    isEngineer,
-    loading: false,
-    initialized: true
-  });
-} catch (error) {
-  console.error('Error initializing user data:', error);
-  await clearAuthState();
-}
+})();
