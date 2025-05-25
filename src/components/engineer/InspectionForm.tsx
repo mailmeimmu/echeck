@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
-import { useInspectionDraft } from '../../hooks/useInspectionDraft';
+import { useInspectionDraft } from '../../hooks/useInspectionDraft'; 
+import { useAuthStore } from '../../store/authStore';
 
 interface InspectionFormProps {
   bookingId: string;
@@ -9,7 +10,7 @@ interface InspectionFormProps {
 }
 
 export const InspectionForm = ({ bookingId, onComplete }: InspectionFormProps) => {
-  const { data: { user } } = await supabase.auth.getUser();
+  const { user } = useAuthStore();
   const { draft, saveDraft, isSaving } = useInspectionDraft(bookingId, user?.id || '');
 
   const [formData, setFormData] = useState({
@@ -36,7 +37,7 @@ export const InspectionForm = ({ bookingId, onComplete }: InspectionFormProps) =
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     const newData = {
-      ...prev,
+      ...formData,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     };
     setFormData(newData);
@@ -255,3 +256,4 @@ export const InspectionForm = ({ bookingId, onComplete }: InspectionFormProps) =
       </div>
     </motion.form>
   );
+};

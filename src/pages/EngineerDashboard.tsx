@@ -4,6 +4,7 @@ import { useOutletContext } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useEngineer } from '../hooks/useEngineer';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { useState } from 'react';
 
 interface EngineerLayoutContext {
   setShowInspectionForm: (show: boolean) => void;
