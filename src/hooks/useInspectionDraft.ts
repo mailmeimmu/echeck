@@ -1,11 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 
-interface SaveDraftOptions {
-  onSuccess?: () => void;
-  onError?: (error: Error) => void;
-}
-
 export const useInspectionDraft = (bookingId: string, engineerId: string) => {
   const queryClient = useQueryClient();
 
@@ -28,7 +23,7 @@ export const useInspectionDraft = (bookingId: string, engineerId: string) => {
   });
 
   const saveDraft = useMutation({
-    mutationFn: async (data: any, options?: SaveDraftOptions) => {
+    mutationFn: async (data: any) => {
       if (!bookingId || !engineerId) return;
 
       // First check if a draft already exists
@@ -65,11 +60,9 @@ export const useInspectionDraft = (bookingId: string, engineerId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inspectionDraft', bookingId] });
-      return true;
     },
     onError: (error) => {
       console.error('Error saving draft:', error);
-      return false;
     }
   });
 
@@ -91,15 +84,9 @@ export const useInspectionDraft = (bookingId: string, engineerId: string) => {
   return {
     draft: draftQuery.data,
     isLoading: draftQuery.isLoading,
-    isSuccess: saveDraft.isSuccess,
     isError: draftQuery.isError,
     error: draftQuery.error,
-    saveDraft: (data: any, options?: SaveDraftOptions) => {
-      return saveDraft.mutate(data, {
-        onSuccess: () => options?.onSuccess?.(),
-        onError: (error) => options?.onError?.(error as Error)
-      });
-    },
+    saveDraft: saveDraft.mutate,
     isSaving: saveDraft.isPending,
     deleteDraft: deleteDraft.mutate,
     isDeleting: deleteDraft.isPending,
