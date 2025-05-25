@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { createClientComponentClient } from '@supabase/auth-helpers-react';
+import { createClient } from '@supabase/supabase-js';
 
 interface InspectionFormProps {
   bookingId: string;
   engineerId: string;
   onSubmit?: () => void;
 }
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 export default function InspectionForm({ bookingId, engineerId, onSubmit }: InspectionFormProps) {
   const [formData, setFormData] = useState({
@@ -21,7 +26,6 @@ export default function InspectionForm({ bookingId, engineerId, onSubmit }: Insp
     notes: ''
   });
 
-  const supabase = createClientComponentClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
