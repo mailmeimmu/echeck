@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { createClientComponentClient } from '@supabase/auth-helpers-react';
 
 interface InspectionFormProps {
   bookingId: string;
@@ -21,7 +21,7 @@ export default function InspectionForm({ bookingId, engineerId, onSubmit }: Insp
     notes: ''
   });
 
-  const supabase = useSupabaseClient();
+  const supabase = createClientComponentClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
