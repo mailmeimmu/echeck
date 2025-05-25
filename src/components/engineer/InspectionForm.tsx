@@ -15,7 +15,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 interface InspectionFormProps {
   bookingId: string;
-  onComplete?: () => void; // Made optional with ?
+  onComplete?: () => void;
 }
 
 interface Step {
@@ -365,7 +365,7 @@ const inspectionSections: InspectionSection[] = [
   }
 ];
 
-export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionFormProps) => { // Added default value
+export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionFormProps) => {
   const { user } = useAuthStore();
   const { data: engineer } = useEngineer(user?.id);
   const [currentStep, setCurrentStep] = useState(0);
@@ -380,7 +380,6 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
   const [showPreview, setShowPreview] = useState(false);
   const reportRef = React.useRef<HTMLDivElement>(null);
   
-  // Scroll to top when form opens
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
@@ -392,7 +391,6 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
     deleteDraft
   } = useInspectionDraft(bookingId, engineer?.id || '');
 
-  // Load draft data on mount
   useEffect(() => {
     if (draft?.data) {
       if (draft.data.answers) setAnswers(draft.data.answers);
@@ -401,7 +399,6 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
     }
   }, [draft]);
 
-  // Auto-save when form data changes
   useEffect(() => {
     const debouncedSave = setTimeout(() => {
       if (Object.keys(answers).length > 0 || Object.keys(photos).length > 0 || Object.keys(notes).length > 0) {
@@ -416,13 +413,10 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
     return () => clearTimeout(debouncedSave);
   }, [answers, photos, notes, saveDraft]);
 
-  // Notify parent components when the form opens or closes
   useEffect(() => {
-    // Dispatch custom event when form opens
     window.dispatchEvent(new CustomEvent('inspection-form-open'));
     
     return () => {
-      // Dispatch custom event when form closes
       window.dispatchEvent(new CustomEvent('inspection-form-close'));
     };
   }, []);
@@ -454,7 +448,6 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
   const currentSection = inspectionSections[currentStep];
 
   const handleNext = () => {
-    // Validate current section
     for (const question of currentSection.questions) {
       const answer = answers[currentSection.id]?.[question.id];
       if (answer === undefined) {
@@ -489,30 +482,24 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
     try {
       setPdfGenerating(true);
       
-      // Create a new PDF document
       const pdf = new jsPDF('p', 'mm', 'a4');
       
-      // Add title
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(20);
       pdf.text('تقرير فحص العقار', 105, 20, { align: 'center' });
       
-      // Add date
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'normal');
       pdf.text(`تاريخ الفحص: ${new Date().toLocaleDateString('ar-SA')}`, 105, 30, { align: 'center' });
       
       let yPosition = 40;
       
-      // Add sections and answers
       for (const section of inspectionSections) {
-        // Add section title
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(16);
         pdf.text(section.title, 190, yPosition, { align: 'right' });
         yPosition += 10;
         
-        // Add questions and answers
         pdf.setFont('helvetica', 'normal');
         pdf.setFontSize(12);
         
@@ -531,18 +518,15 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
               answerText = `${answer}/10`;
             }
             
-            // Add question and answer
             pdf.text(`${question.text}: ${answerText}`, 190, yPosition, { align: 'right' });
             yPosition += 8;
             
-            // Add notes if any
             const note = notes[`${section.id}_${question.id}`];
             if (note) {
               pdf.text(`ملاحظات: ${note}`, 190, yPosition, { align: 'right' });
               yPosition += 8;
             }
             
-            // Check if we need a new page
             if (yPosition > 270) {
               pdf.addPage();
               yPosition = 20;
@@ -552,14 +536,12 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
         
         yPosition += 10;
         
-        // Check if we need a new page
         if (yPosition > 270) {
           pdf.addPage();
           yPosition = 20;
         }
       }
       
-      // Save the PDF
       pdf.save('تقرير_فحص_العقار.pdf');
       
       setPdfGenerating(false);
@@ -575,7 +557,6 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
     setError(null);
 
     try {
-      // Validate all required fields
       for (const section of inspectionSections) {
         for (const question of section.questions) {
           const answer = answers[section.id]?.[question.id];
@@ -593,7 +574,6 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
         }
       }
 
-      // Submit inspection data
       const { data: inspection } = await supabase.rpc('submit_inspection', {
         p_booking_id: bookingId,
         p_tiles_data: answers.tiles,
@@ -605,12 +585,10 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
         p_notes: notes
       });
 
-      // Generate PDF report
       await generatePDF();
       
       setSuccess(true);
       
-      // Close modal after success
       setTimeout(() => {
         onComplete();
       }, 3000);
@@ -640,7 +618,6 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
             className="bg-white rounded-2xl sm:rounded-3xl shadow-xl w-full min-h-screen sm:min-h-0 sm:w-[95%] sm:max-w-3xl sm:max-h-[90vh] flex flex-col p-4 sm:p-6 my-0 sm:my-4"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close button */}
             <div className="flex justify-between items-center mb-3 sm:mb-5 flex-shrink-0 sticky top-0 bg-white z-10 pb-2 border-b border-gray-100 pt-2">
               <h2 className="text-xl sm:text-2xl font-bold">تقرير الفحص</h2>
               <div className="flex items-center gap-2">
@@ -706,7 +683,6 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
               </motion.div>
             ) : (
               <div className="flex flex-col h-full overflow-hidden">
-                {/* Progress Bar */}
                 <div className="bg-gray-100 h-2 rounded-full overflow-hidden flex-shrink-0 mb-4">
                   <motion.div
                     className="h-full bg-emerald-500"
@@ -715,7 +691,6 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                   />
                 </div>
 
-                {/* Section Title */}
                 <motion.div
                   key={`title-${currentSection.id}`}
                   initial={{ opacity: 0, x: 20 }}
@@ -728,7 +703,6 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                   </p>
                 </motion.div>
 
-                {/* Questions */}
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={`section-${currentSection.id}`}
@@ -761,4 +735,128 @@ export const InspectionForm = ({ bookingId, onComplete = () => {} }: InspectionF
                             <button
                               onClick={() => handleAnswer(currentSection.id, question.id, false)}
                               className={`flex-1 p-2 sm:p-3 rounded-xl border-2 transition-colors ${
-                                answers[
+                                answers[currentSection.id]?.[question.id] === false
+                                  ? 'border-red-500 bg-red-50'
+                                  : 'border-gray-200 hover:border-red-500'
+                              }`}
+                            >
+                              لا
+                            </button>
+                          </div>
+                        )}
+
+                        {question.type === 'select' && (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {question.options?.map((option) => (
+                              <button
+                                key={option.value}
+                                onClick={() => handleAnswer(currentSection.id, question.id, option.value)}
+                                className={`p-2 sm:p-3 rounded-xl border-2 transition-colors ${
+                                  answers[currentSection.id]?.[question.id] === option.value
+                                    ? 'border-emerald-500 bg-emerald-50'
+                                    : 'border-gray-200 hover:border-emerald-500'
+                                }`}
+                              >
+                                {option.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {question.type === 'rating' && (
+                          <div className="flex gap-2 justify-center">
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
+                              <button
+                                key={rating}
+                                onClick={() => handleAnswer(currentSection.id, question.id, rating)}
+                                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                                  answers[currentSection.id]?.[question.id] === rating
+                                    ? 'bg-emerald-500 text-white'
+                                    : 'bg-gray-100 hover:bg-emerald-100'
+                                }`}
+                              >
+                                {rating}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {question.requiresPhoto && (
+                          <div className="mt-4">
+                            <PhotoUploader
+                              onUpload={(url) => handlePhotoUpload(`${currentSection.id}_${question.id}`, url)}
+                              photos={photos[`${currentSection.id}_${question.id}`] || []}
+                            />
+                          </div>
+                        )}
+
+                        {question.requiresNote && answers[currentSection.id]?.[question.id] === false && (
+                          <div className="mt-4">
+                            <textarea
+                              value={notes[`${currentSection.id}_${question.id}`] || ''}
+                              onChange={(e) => handleNote(currentSection.id, question.id, e.target.value)}
+                              placeholder="أضف ملاحظاتك هنا..."
+                              className="w-full p-2 border border-gray-300 rounded-lg"
+                              rows={3}
+                            />
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </AnimatePresence>
+
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg mt-4 flex items-center gap-2"
+                  >
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <p>{error}</p>
+                  </motion.div>
+                )}
+
+                <div className="flex justify-between mt-6 pt-4 border-t border-gray-100">
+                  <Button
+                    onClick={handlePrevious}
+                    disabled={currentStep === 0}
+                    variant="outline"
+                  >
+                    <ChevronRight className="w-5 h-5 ml-1" />
+                    السابق
+                  </Button>
+
+                  {currentStep === inspectionSections.length - 1 ? (
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={loading}
+                      className="bg-emerald-500 hover:bg-emerald-600"
+                    >
+                      {loading ? (
+                        <>
+                          <LoadingSpinner className="w-5 h-5 ml-2" />
+                          جاري الحفظ...
+                        </>
+                      ) : (
+                        <>
+                          <FileText className="w-5 h-5 ml-2" />
+                          حفظ التقرير
+                        </>
+                      )}
+                    </Button>
+                  ) : (
+                    <Button onClick={handleNext}>
+                      التالي
+                      <ChevronLeft className="w-5 h-5 mr-1" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
