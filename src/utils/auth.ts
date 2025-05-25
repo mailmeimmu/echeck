@@ -1,29 +1,29 @@
 import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
 import { checkEngineerStatus } from './engineer';
+import { withRetry } from './databaseHelpers';
 
 const createProfileIfNeeded = async (userId: string, email: string, firstName?: string) => {
   try {
-    // First check if profile exists using RPC
-    const { data: existingProfile, error: fetchError } = await supabase.rpc('get_user_profile', {
-      p_user_id: userId
-    });
-
-    if (fetchError && !fetchError.message.includes('not found')) {
-      console.error('Error fetching profile:', fetchError);
-      return null;
-    }
-
-    if (existingProfile) {
-      return existingProfile;
-    }
-
-    // If no profile exists, create one with retry logic
-    let retries = 0;
-    const maxRetries = 3;
-
-    while (retries < maxRetries) {
+    // Use withRetry for better error handling
+    return await withRetry(async () => {
+      // First check if profile exists using RPC
       try {
+        const { data: existingProfile, error: fetchError } = await supabase.rpc('get_user_profile', {
+          p_user_id: userId
+        });
+
+        if (fetchError) {
+          if (fetchError.message.includes('not found')) {
+            // Profile doesn't exist, create it
+            throw new Error('Profile not found');
+          }
+          throw fetchError;
+        }
+
+        return existingProfile;
+      } catch (error) {
+        // If profile doesn't exist or there was an error fetching it, create a new one
         const { data: newProfile, error: insertError } = await supabase
           .from('profiles')
           .upsert([{
@@ -36,14 +36,8 @@ const createProfileIfNeeded = async (userId: string, email: string, firstName?: 
 
         if (insertError) throw insertError;
         return newProfile;
-      } catch (error) {
-        retries++;
-        if (retries === maxRetries) throw error;
-        await new Promise(resolve => setTimeout(resolve, 1000 * retries));
       }
-    }
-
-    return null;
+    }, 5);
   } catch (error) {
     console.error('Error in createProfileIfNeeded:', error);
     return null;
