@@ -1,6 +1,5 @@
-import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useBookingStore } from '../../store/bookingStore';
+import { useBookings } from '../../hooks/useBookings';
 import { Calendar, Clock, Package, Building, MapPin, FileText, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
@@ -9,14 +8,11 @@ import { ReportViewer } from './ReportViewer';
 import { supabase } from '../../lib/supabase';
 
 export const BookingsList = () => {
-  const { bookings, loading, error, fetchBookings, clearError } = useBookingStore();
+  const { bookings, isLoading, isError, error } = useBookings();
   const [selectedBooking, setSelectedBooking] = useState<string | null>(null);
   const [bookingsWithReports, setBookingsWithReports] = useState<string[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
 
-  useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -37,12 +33,11 @@ export const BookingsList = () => {
       fetchReports();
     }
   }, [bookings]);
-
-  if (loading) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 
-  if (error) {
+  if (isError) {
     return (
       <motion.div
         initial={{ opacity: 0 }}
@@ -51,13 +46,10 @@ export const BookingsList = () => {
       >
         <div className="flex items-center justify-center gap-2 text-red-600 mb-4">
           <AlertCircle className="w-6 h-6" />
-          <p>{error}</p>
+          <p>{error instanceof Error ? error.message : 'حدث خطأ في تحميل الحجوزات'}</p>
         </div>
         <Button 
-          onClick={() => {
-            clearError();
-            fetchBookings();
-          }}
+          onClick={() => window.location.reload()}
           variant="outline"
           className="mx-auto"
         >
